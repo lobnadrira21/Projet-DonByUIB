@@ -1,0 +1,36 @@
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+  .btn-add-association {
+    background-color: black;
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s ease;
+    position: absolute;
+    right: 20px; /* Moves button to the right */
+    top: 50%;
+    transform: translateY(-50%); /* Centers it vertically */
+    
+    i {
+      font-size: 20px;
+    }
+  
+    &:hover {
+      background-color: darken(#eb1c34, 10%);
+    }
+  }
+
+
+  
+  

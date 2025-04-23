@@ -1,0 +1,57 @@
+<app-header-front></app-header-front>
+
+<section class="don-detail-container" *ngIf="don">
+  <!-- 🟢 Partie Gauche : détails du don -->
+  <div class="don-left">
+    <div class="don-card">
+      <img [src]="'http://localhost:5000' + don.photo_don" alt="Photo Don" class="don-image" />
+
+      <div class="don-content">
+        <h2 class="don-title">{{ don.titre }}</h2>
+        <p class="don-organisateur">Organisé par : <strong>{{ don.nom_organisateur }}</strong></p>
+        <p class="don-description">{{ don.description }}</p>
+
+        <div class="progress">
+          <div class="progress-bar"
+               role="progressbar"
+               [style.width]="(don.montant_collecte / don.objectif * 100) + '%'"
+               [attr.aria-valuenow]="(don.montant_collecte / don.objectif * 100)"
+               aria-valuemin="0" aria-valuemax="100">
+            {{ (don.montant_collecte / don.objectif * 100) | number: '1.0-0' }}%
+          </div>
+        </div>
+
+        <p class="don-stats">
+          <strong>{{ don.montant_collecte | number:'1.0-0' }} DT</strong> collectés sur 
+          <strong>{{ don.objectif | number:'1.0-0' }} DT</strong>
+        </p>
+
+        <p class="don-date">Date limite : {{ don.date_fin_collecte | date:'dd MMMM y' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🟡 Partie Droite : carte avec % et bouton -->
+  <div class="don-right">
+    <div class="info-card">
+      <!-- Cercle de pourcentage -->
+      <div class="circle">
+        <div class="percent-text">{{ getPourcentage(don.montant_collecte, don.objectif) }}%</div>
+      </div>
+
+      <div class="collected">
+        <strong>{{ don.montant_collecte | number:'1.0-0' }} DT</strong> collectés sur
+        <strong>{{ don.objectif | number:'1.0-0' }} DT</strong>
+      </div>
+
+      <div class="action-buttons">
+      
+        <a [routerLink]="['/participate', don.id_don]" class="btn-yellow"> Faire un don</a>
+      </div>
+
+      <p class="reste">Reste à collecter :
+        <strong>{{ don.objectif - don.montant_collecte | number:'1.0-0' }} DT</strong>
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,164 @@
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffffff, #f5f5f5);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+
+  .bg-logo {
+    position: absolute;
+    top: 50%;
+    right: 5%; /* ✅ aligné à droite */
+    transform: translateY(-50%); /* ✅ ne pas centrer horizontalement */
+    opacity: 0.05;
+    width: 50%;
+    max-width: 500px;
+    z-index: 0;
+  }
+  
+
+  span {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    animation: move 8s infinite ease-in-out alternate;
+    opacity: 0.1;
+  }
+
+ 
+
+  span:nth-child(3) {
+    top: 50%;
+    left: 25%;
+    background: #ffffff;
+    border: 2px solid black;
+  }
+
+  span:nth-child(4) {
+    top: 20%;
+    left: 5%;
+    background: #eb1c34;
+  }
+
+  span:nth-child(5) {
+    top: 70%;
+    left: 10%;
+    background: #000000;
+  }
+}
+
+@keyframes move {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card {
+  z-index: 1;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 450px;
+  max-width: 90%;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.uib-logo {
+  width: 120px;
+  height: auto;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+
+  .mat-form-field-prefix {
+    margin-right: 8px;
+    align-items: center;
+    display: flex;
+  }
+
+  .mat-icon {
+    color: #333;
+  }
+
+  .mat-form-field-infix {
+    min-height: 48px;
+  }
+}
+
+button.mat-raised-button {
+  background-color: #eb1c34 !important;
+  border-radius: 5px;
+  font-weight: bold;
+  padding: 12px 20px;
+  width: 100%;
+  color: white;
+  transition: all 0.3s ease-in-out;
+}
+
+button.mat-raised-button:hover {
+  background-color: #c3142a !important;
+}
+
+.mat-checkbox {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.mat-checkbox .mat-checkbox-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+re-captcha {
+  display: block;
+  margin: 10px auto;
+  max-width: 100%;
+}
+
+.text-danger {
+  color: #eb1c34;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+p.text-muted {
+  font-size: 14px;
+  margin-top: 20px;
+
+  a {
+    color: black;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,79 @@
+.participation-form {
+    max-width: 500px;
+    margin: 100px auto 0;
+   
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+  
+    h2 {
+      color: #eb1c34;
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+  
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+  
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+      }
+  
+      input[type='number'] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+  
+        &:focus {
+          border-color: #eb1c34;
+          outline: none;
+        }
+      }
+  
+      .error {
+        color: #e53935;
+        font-size: 0.85rem;
+        margin-top: 5px;
+      }
+    }
+  
+    .btn-yellow {
+      background-color: #eb1c34;
+      color: white;
+      font-weight: bold;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+      width: 100%;
+  
+      &:hover {
+        background-color: #c4172a;
+      }
+  
+      &:disabled {
+        background-color: #ddd;
+        cursor: not-allowed;
+        color: #aaa;
+      }
+    }
+  }
+  

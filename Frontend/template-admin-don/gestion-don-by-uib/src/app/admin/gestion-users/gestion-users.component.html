@@ -1,0 +1,74 @@
+<div class="main-content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-12 table-container"> <!-- ✅ Ajout de la classe -->
+          <div class="card">
+            <div class="card-header card-header-danger d-flex justify-content-between align-items-center">
+                <div>
+                  <h4 class="card-title">Gestion des associations</h4>
+                  <p class="card-category">La table de gestion des comptes des associations</p>
+                </div>
+                <button class="btn-add-association"   (click)="openAddAssociationModal()">
+                  <i class="material-icons">add</i>
+                </button>
+              </div>
+            
+  
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class="text-primary">
+                                  <tr>
+                                    <th>ID</th>
+                                    <th>Nom complet</th>
+                                    <th>Description</th>
+                                    <th>Adresse</th>
+                                    <th>Téléphone</th>
+                                    <th>Type</th>
+                                    <th class="text-right">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr *ngFor="let association of associations; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>{{ association.nom_complet }}</td>
+                                    <td>{{ association.description_association }}</td>
+                                    <td>{{ association.adresse }}</td>
+                                    <td>{{ association.telephone }}</td>
+                                    <td>{{ association.type_association }}</td>
+                                    <td class="td-actions text-right">
+                                      <button mat-raised-button class="btn btn-primary btn-sm">
+                                        <i class="material-icons">edit</i>
+                                      </button>
+                                      <button mat-raised-button class="btn btn-danger btn-sm">
+                                        <i class="material-icons">delete</i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <ng-template #noData>
+                                <tbody>
+                                  <tr>
+                                    <td colspan="7">
+                                      <div class="alert alert-warning text-center">Aucune association trouvée.</div>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            
+
+                                      
+                                    
+
+         
+        </div>
+    </div>
+  </div>
+  

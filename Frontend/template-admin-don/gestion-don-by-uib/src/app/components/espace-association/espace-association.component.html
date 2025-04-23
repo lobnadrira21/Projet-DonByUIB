@@ -1,0 +1,20 @@
+<div class="wrapper">
+    <!-- SIDEMENU -->
+    <div class="sidebar" data-color="danger" data-background-color="white" data-image="./assets/img/sidebar-1.jpg">
+        <app-sidemenu-association></app-sidemenu-association>
+        <div class="sidebar-background" style="background-image: url(./assets/img/sidebar-4.jpg)"></div>
+    </div>
+
+    <div class="main-panel">
+        <!-- TOPBAR -->
+        <app-topbar-association></app-topbar-association>
+
+        <router-outlet></router-outlet>
+
+
+        <!-- FOOTER (Displayed only when route is 'maps') -->
+        <div *ngIf="isMaps('maps')">
+            <app-bottombar-association></app-bottombar-association>
+        </div>
+    </div>
+</div>

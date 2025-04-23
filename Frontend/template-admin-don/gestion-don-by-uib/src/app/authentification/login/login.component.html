@@ -1,0 +1,81 @@
+<div class="auth-wrapper">
+  <img src="assets/img/uibreallogo.png" class="bg-logo" alt="Logo background" />
+
+  <div class="auth-content">
+    <div class="auth-bg">
+      <span class="r"></span>
+      <span class="r s"></span>
+      <span class="r s"></span>
+      <span class="r"></span>
+      <span class="r"></span>
+    </div>
+     
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="logo-container">
+            <img src="assets/img/uiblogo.png" alt="UIB Logo" class="uib-logo" (click)="goToHome()" style="cursor: pointer;" />
+          </div>
+          <h3 class="mb-4">Login</h3>
+          <div class="input-group mb-3">
+            <span class="input-group-text"><mat-icon>mail</mat-icon></span>
+            <input type="email" [(ngModel)]="email" class="form-control" placeholder="Email" />
+          </div>
+          <div class="input-group mb-4">
+            <span class="input-group-text"> <mat-icon>lock</mat-icon></span>
+            <input type="password" [(ngModel)]="password" class="form-control" placeholder="Password" />
+          </div>
+          <p class="mb-2 text-muted">
+            Forgot password?
+            <a style="color: black;" [routerLink]="'/request-password'">Reset</a>
+          </p>
+          
+  
+
+
+          
+          <button class="btn btn-primary mb-4"  (click)="login()">Login</button>
+          <p *ngIf="errorMessage" class="text-danger">{{ errorMessage }}</p>
+          <div class="social-login">
+            <div class="separator">
+              <span>Sign Up With</span>
+            </div>
+            <div id="g_id_onload"
+     data-client_id="841926294712-fqfpta7nvuf8t90r396fiaa6je9qagsh.apps.googleusercontent.com"
+     data-context="signin"
+     data-login_uri="http://localhost:4200/login"  
+     data-auto_select="true"
+     data-itp_support="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-text="sign_in_with"
+     data-shape="rectangular"
+     data-logo_alignment="left">
+</div>
+ <!-- <div class="social-buttons">
+              <button class="social-btn google" >
+                <i class="fab fa-google" (click)="signInWithGoogle()"   ></i> Google
+              </button>
+</div>
+              
+              <button class="social-btn facebook" >
+                <i class="fab fa-facebook-f"></i> Facebook
+              </button>
+              
+            
+          </div> -->
+  
+
+         
+          <p class="mb-0 text-muted">
+            Don’t have an account?
+            <a  style="color: black;" [routerLink]="'/register'"   >Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  

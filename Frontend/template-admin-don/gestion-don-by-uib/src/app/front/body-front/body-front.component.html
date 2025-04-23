@@ -1,0 +1,179 @@
+<section class="hero">
+  <div class="content-left">
+    <h1>Plateforme de dons<br><strong>accessible sur web et mobile</strong></h1>
+    <p>
+      DonByUIB est une solution digitale développée par l’Union Internationale de Banques (UIB) 
+      pour promouvoir la solidarité et l'engagement associatif.
+    </p>
+    <div class="btn-group">
+      <button class="btn-primary">Effectuer un don</button>
+      <button class="btn-secondary" (click)="scrollToCatalog()">Consulter tous les dons </button>
+    </div>
+  </div>
+
+  <div class="content-right">
+    <div class="phone-3d">
+      <img src="assets/img/uib-3d-app.png" alt="3D Phone with UIB App" />
+    </div>
+  </div>
+</section>
+
+<!-- ✅ SEARCH BAR -->
+<section class="search-section">
+  <div class="search-box">
+    <input
+      type="text"
+      placeholder="Search for donations..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+    />
+  </div>
+</section>
+
+
+
+<!-- ✅ Cards Section -->
+
+<section class="don-cards" id="catalog">
+ 
+  <div class="card-container" *ngFor="let don of dons">
+   
+    <div class="card">
+      <img [src]="'http://localhost:5000' + don.photo_don" alt="Photo Don" class="card-img-top" />
+
+      <span class="badge bg-secondary">Autre</span>
+      <h4 class="card-title text-center mt-2">{{ don.titre }}</h4>
+      <p class="text-center mb-1">Organisé par : <strong>{{ don.nom_organisateur }}</strong></p>
+      <p class="text-muted text-center">{{ don.description }}</p>
+
+      <!-- Progress Bar -->
+      <div class="progress w-100 mt-2">
+        <div class="progress-bar"
+             role="progressbar"
+             [style.width]="getPourcentage(don.montant_collecte, don.objectif) + '%'"
+             [attr.aria-valuenow]="getPourcentage(don.montant_collecte, don.objectif)"
+             aria-valuemin="0" aria-valuemax="100">
+          {{ getPourcentage(don.montant_collecte, don.objectif) }}%
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between w-100 mt-2">
+        <div><strong>{{ don.montant_collecte | number:'1.0-0' }} DT</strong> Collecté</div>
+        <div><strong>{{ donParticipants[don.id_don] || 0 }}</strong> Participant(s)</div>
+
+      </div>
+
+      <a [routerLink]="['/don', don.id_don]" class="btn-view">Voir</a>
+    </div>
+    
+
+  </div>
+</section>
+
+
+<!-- Publications Section after Dons -->
+<section class="publication-feed" id="publication">
+  <div class="publication-left">
+    <h3>Les publications</h3>
+    <div *ngFor="let pub of publications" class="publication-preview" (click)="selectPublication(pub)">
+      <h4>{{ pub.titre }}</h4>
+      <p>{{ pub.date_publication | date }}</p>
+    </div>
+  </div>
+
+  <div class="publication-right" *ngIf="selectedPublication">
+    <div class="post-card">
+      <div class="post-header">
+        <img src="assets/img/profile.jpg" alt="profil" class="profile-img" />
+        <div class="post-info">
+          <h4>{{ selectedPublication.nom_association }}</h4>
+          <span class="post-date">{{ selectedPublication.date_publication | date }}</span>
+        </div>
+      </div>
+
+      <div class="post-content">
+        <p>{{ selectedPublication.contenu }}</p>
+        <div class="hashtags">
+          <span>#Solidarité</span>
+          <span>#Engagement</span>
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button (click)="likeSelectedPublication()">
+          <mat-icon>favorite</mat-icon> J’aime ({{ selectedPublication.nb_likes }})
+        </button>
+        
+        <button><mat-icon>comment</mat-icon> Commenter</button>
+        <!-- <button><mat-icon>share</mat-icon> Partager</button> -->
+      </div>
+
+      <div class="comments-section">
+        <div *ngFor="let com of selectedPublication.commentaires" class="comment">
+          <strong>{{ com.nom }}</strong> : {{ com.contenu }}
+        </div>
+        <div class="comment-input">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ajouter un commentaire</mat-label>
+            <input matInput [(ngModel)]="newComment" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" (click)="addComment()">Envoyer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- ✅ Section Qui sommes-nous -->
+<section class="about-section" id="about">
+  <div class="about-container">
+    <div class="about-text">
+      <h2>Qui sommes-nous ?</h2>
+      <p>
+        DonByUIB est une plateforme solidaire conçue par l’Union Internationale de Banques (UIB) pour soutenir les initiatives associatives
+        et promouvoir la culture du don en Tunisie. Accessible sur le web et mobile, elle permet aux associations de lancer des campagnes de
+        collecte de fonds et aux donateurs de contribuer en toute simplicité.
+      </p>
+      <p>
+        Notre mission est de faciliter la solidarité à travers une interface intuitive, transparente et sécurisée, mettant en relation directe
+        les associations et les donateurs autour de causes humanitaires, sociales ou environnementales.
+      </p>
+    </div>
+    <div class="about-image">
+      <img src="assets/img/aboutus.png" alt="Présentation DonByUIB" />
+    </div>
+  </div>
+</section>
+
+<!-- ✅ Contact Section -->
+<section id="contact" class="contact-section">
+  <div class="contact-header">
+    <h2>Contactez-nous</h2>
+ 
+  </div>
+
+  <div class="contact-form-container">
+    <form class="contact-form">
+      <div class="form-group">
+        <label for="nom">Nom complet</label>
+        <input type="text" id="nom" placeholder="Votre nom" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Adresse email</label>
+        <input type="email" id="email" placeholder="Votre email" required />
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" rows="5" placeholder="Votre message..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary">Envoyer</button>
+    </form>
+  </div>
+</section>
+

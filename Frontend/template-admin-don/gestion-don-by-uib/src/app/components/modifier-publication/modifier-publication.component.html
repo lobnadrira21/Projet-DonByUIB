@@ -1,0 +1,15 @@
+<h2    class="page-title">Modifier la publication</h2>
+
+<form (ngSubmit)="onUpdate()" class="publication-form">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Titre</mat-label>
+    <input matInput [(ngModel)]="publication.titre" name="titre" required>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Contenu</mat-label>
+    <textarea matInput [(ngModel)]="publication.contenu" name="contenu" rows="6" required></textarea>
+  </mat-form-field>
+
+  <button mat-raised-button color="warn" class="btn-enregistrer" type="submit">Enregistrer</button>
+</form>

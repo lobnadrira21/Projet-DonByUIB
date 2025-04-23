@@ -1,0 +1,37 @@
+<header class="header">
+    <div class="brand">
+      <img src="assets/img/uiblogo.png" alt="Logo" class="logo-img" />
+      <div class="logo">Don By UIB</div>
+    </div>
+  
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="#catalog">Dons</a></li>
+        <li><a href="#publication">Publications</a> </li>
+        <li><a href="#about">Qui sommes-nous</a></li>
+        <li><a href="#contact">Contact</a></li>
+
+      </ul>
+    </nav>
+  
+    <!-- ✅ Buttons -->
+    <div class="auth-buttons">
+      <!-- Si connecté, afficher le nom d'utilisateur et bouton logout -->
+      <ng-container *ngIf="isLoggedIn; else notLoggedIn">
+        <span class="welcome-msg">👋 {{ username }}</span>
+        <button class="btn-primary" [routerLink]="'/dashboard-donator'">Return to my space</button>
+        <button class="btn-secondary" (click)="logout()">Logout</button>
+      </ng-container>
+    
+      <!-- Sinon, afficher Login et Register -->
+      <ng-template #notLoggedIn>
+        <button class="btn-secondary" (click)="goToLogin()">Login</button>
+        <button class="btn-primary" (click)="goToRegister()">Register</button>
+      </ng-template>
+    </div>
+    
+      
+      
+  </header>
+  

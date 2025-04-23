@@ -1,0 +1,74 @@
+<div class="auth-wrapper">
+  <!-- ✅ Background with bubbles and transparent logo -->
+  <div class="auth-bg">
+    <img src="assets/img/uibreallogo.png" class="bg-logo" alt="Logo UIB" />
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="auth-content">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="logo-container">
+          <img src="assets/img/uiblogo.png" alt="UIB Logo" class="uib-logo" (click)="goToHome()" style="cursor: pointer;" />
+        </div>
+
+        <h3 class="mb-4">Inscription</h3>
+
+        <!-- Full Name -->
+        <mat-form-field appearance="outline">
+          <mat-label>Nom complet *</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput [(ngModel)]="nom_complet" required />
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline">
+          <mat-label>Email *</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" [(ngModel)]="email" required />
+        </mat-form-field>
+
+        <!-- Téléphone -->
+        <mat-form-field appearance="outline">
+          <mat-label>Téléphone *</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput type="text" [(ngModel)]="telephone" required />
+        </mat-form-field>
+
+        <!-- Password -->
+        <mat-form-field appearance="outline">
+          <mat-label>Mot de passe *</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput type="password" [(ngModel)]="password" required />
+        </mat-form-field>
+
+        <!-- Confirm Password -->
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmer mot de passe *</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput type="password" [(ngModel)]="confirmPassword" required />
+        </mat-form-field>
+
+        <!-- Checkbox -->
+        <mat-checkbox [(ngModel)]="role" [value]="'donator'">Tu es un donateur</mat-checkbox>
+
+        <!-- reCAPTCHA -->
+        <re-captcha (resolved)="resolved($event)" siteKey="6LdaY_kqAAAAAGYY-KuV6Xeu12XEchvGwMdqY7_x"></re-captcha>
+
+        <p *ngIf="errorMessage" class="text-danger">{{ errorMessage }}</p>
+
+        <!-- Register Button -->
+        <button mat-raised-button color="primary" (click)="register()">Enregistrer</button>
+
+        <!-- Already have account -->
+        <p class="text-muted">
+          Déjà inscrit ? <a [routerLink]="'/login'">Se connecter</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

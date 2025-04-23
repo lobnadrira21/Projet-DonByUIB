@@ -1,0 +1,19 @@
+<div class="wrapper">
+    <!-- SIDEMENU -->
+    <div class="sidebar" data-color="danger" data-background-color="white" data-image="./assets/img/sidebar-1.jpg">
+        <app-sidebar-donator></app-sidebar-donator>
+        <div class="sidebar-background" style="background-image: url(./assets/img/sidebar-4.jpg)"></div>
+    </div>
+
+    <div class="main-panel">
+        <!-- TOPBAR -->
+        <app-header-donator></app-header-donator>
+        <app-body-donator></app-body-donator>
+        <router-outlet></router-outlet>
+
+        <!-- FOOTER (Displayed only when route is 'maps') -->
+        <div *ngIf="isMaps('maps')">
+            <app-footer-donator></app-footer-donator>
+        </div>
+    </div>
+</div>

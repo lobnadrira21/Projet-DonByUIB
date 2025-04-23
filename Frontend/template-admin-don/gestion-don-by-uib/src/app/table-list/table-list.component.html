@@ -1,0 +1,32 @@
+<div class="main-content container mt-4">
+    <!-- ✅ Bouton pour ouvrir le modal -->
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-danger" (click)="openAddDonModal()">
+          <i class="material-icons">add</i> Ajouter un Don
+        </button>
+      </div>
+      
+  
+    <!-- ✅ Liste des dons sous forme de cartes -->
+    <div class="row justify-content-center">
+      <div class="col-md-4" *ngFor="let don of dons">
+        <div class="card shadow-sm mb-4">
+          <img *ngIf="don.photo_don" [src]="'http://127.0.0.1:5000' + don.photo_don" class="card-img-top" alt="Image du don" style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h5 class="card-title text-danger fw-bold">{{ don.titre }}</h5>
+            <p class="card-text text-muted">{{ don.description }}</p>
+            <p><strong>Montant :</strong> {{ don.objectif }} TND</p>
+            <p><strong>Date fin :</strong> {{ don.date_fin_collecte | date:'mediumDate' }}</p>
+            <div class="d-flex justify-content-end gap-2">
+              <button mat-raised-button color="primary" matTooltip="Modifier">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-raised-button color="warn" matTooltip="Supprimer">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  

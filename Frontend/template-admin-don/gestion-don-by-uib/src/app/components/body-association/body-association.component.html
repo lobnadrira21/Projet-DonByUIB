@@ -1,0 +1,53 @@
+
+
+<div class="main-content">
+
+  <div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card card-profile" style=" margin-top: -35px; ">
+          <div class="card-avatar">
+            <a href="javascript:void(0)">
+              <img class="img" [src]="profileForm.value.photo ? 'http://localhost:5000' + profileForm.value.photo : 'assets/img/default-avatar.png'" />
+            </a>
+          </div>
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ profileForm.value.nom_complet }}</h4>
+            <p class="card-description text-muted mb-1">{{ profileForm.value.email }}</p>
+            <p class="card-description">{{ profileForm.value.description_association }}</p>
+            <p class="card-description"><strong>Adresse:</strong> {{ profileForm.value.adresse }}</p>
+            <p class="card-description"><strong>Téléphone:</strong> {{ profileForm.value.telephone }}</p>
+            <p class="card-description"><strong>Type:</strong> {{ profileForm.value.type_association }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="container-fluid" style="margin-top: -20px;">
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <div class="card">
+            <div class="card-header card-header-danger text-center">
+              <h3 class="card-title font-weight-bold">Bienvenue dans votre espace Association</h3>
+              <p class="card-category">Gérez votre profil, vos dons et vos publications facilement</p>
+            </div>
+            <div class="card-body text-center">
+              <img src="/assets/img/uiblogo.png" alt="Logo Association" class="img-fluid mb-4" style="max-height: 100px;" />
+  
+              <p class="lead">Que souhaitez-vous faire aujourd’hui ?</p>
+  
+              <div class="d-flex justify-content-center gap-4 mt-4 flex-wrap">
+                <a class="btn btn-danger btn-lg" [routerLink]="['/dashboard-association', 'user-profile']">
+                  <i class="material-icons">person</i> Modifier mon profil
+                </a>
+                <a class="btn btn-outline-danger btn-lg" [routerLink]="['/dashboard-association', 'table-list']">
+                  <i class="material-icons">content_paste</i> Gérer les dons
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

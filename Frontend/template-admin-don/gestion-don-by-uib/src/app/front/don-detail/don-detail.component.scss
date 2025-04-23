@@ -1,0 +1,100 @@
+.don-detail-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 60px auto 0; /* ✅ Ajout d'un espace en haut */
+  }
+  
+  
+  .don-left {
+    flex: 1 1 60%;
+    min-width: 500px;
+  }
+  
+  .don-right {
+    flex: 1 1 300px;
+    max-width: 320px;
+  }
+  
+  .don-card {
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .don-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  
+  .don-content {
+    padding: 1.5rem;
+  }
+  
+  .info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    text-align: center;
+    position: sticky;
+    top: 100px;
+  }
+  
+  
+  
+  .circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 8px solid #eb1c34;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .percent-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .collected {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .action-buttons {
+    margin-top: 1rem;
+  
+    .btn-yellow {
+      background-color: #eb1c34;
+      color: #000;
+      font-weight: bold;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+  
+      &:hover {
+        background-color: #eb1c34;
+      }
+    }
+  }
+  
+  .reste {
+    margin-top: 1rem;
+    color: #555;
+    font-size: 0.9rem;
+  }
+  

@@ -1,0 +1,146 @@
+/* ✅ Header Base Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background: #f2f2f2;
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+  
+  /* ✅ Navbar Changes on Scroll */
+  .header.scrolled {
+    background: #f2f2f2;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* ✅ Logo Section */
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* ✅ Small Logo Image */
+  .logo-img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+  }
+  
+  /* ✅ Logo Text */
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: black;
+  }
+  
+  /* ✅ Navigation */
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+  }
+  
+  nav a {
+    position: relative;
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+    font-size: 16px;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+  }
+  
+  nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 2px;
+    background-color: #EB1C34;
+    transition: width 0.3s ease;
+  }
+  
+  nav a:hover {
+    color: #EB1C34;
+  }
+  
+  nav a:hover::after {
+    width: 100%;
+  }
+  
+  
+  /* ✅ Buttons */
+  .auth-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* ✅ Login Button */
+  .btn-secondary {
+    background-color: transparent;
+    color: black;
+    padding: 10px 18px;
+    border: 2px solid black;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .btn-secondary:hover {
+    background: black;
+    color: white;
+  }
+  
+  /* ✅ Register Button */
+  .btn-primary {
+    background-color: #EB1C34;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .btn-primary:hover {
+    background: black;
+  }
+  
+  /* ✅ Responsive Styling */
+  @media (max-width: 768px) {
+    .header {
+      padding: 15px 20px;
+    }
+  
+    nav ul {
+      gap: 15px;
+    }
+  
+    .auth-buttons {
+      gap: 5px;
+    }
+  
+    .btn-primary, .btn-secondary {
+      padding: 8px 14px;
+    }
+  
+    .logo-img {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .logo {
+      font-size: 20px;
+    }
+  }
+  

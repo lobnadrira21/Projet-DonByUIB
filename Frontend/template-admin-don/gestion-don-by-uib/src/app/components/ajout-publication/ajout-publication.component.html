@@ -1,0 +1,19 @@
+<h2>Nouvelle publication</h2>
+<form (ngSubmit)="submitPublication()">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Titre</mat-label>
+    <input matInput [(ngModel)]="titre" name="titre" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Contenu</mat-label>
+    <textarea matInput rows="5" [(ngModel)]="contenu" name="contenu" required></textarea>
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-stroked-button color="warn" (click)="closeDialog()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit">Publier</button>
+  </div>
+
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+</form>
