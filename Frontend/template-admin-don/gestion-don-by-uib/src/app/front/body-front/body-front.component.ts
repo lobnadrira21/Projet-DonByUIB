@@ -41,6 +41,18 @@ export class BodyFrontComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.refreshDonsAndParticipants();
+    this.authService.getPublications().subscribe({
+      next: (data) => {
+        this.publications = data;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des publications :', err);
+      }
+    });
+  }
+
+  refreshDonsAndParticipants() {
     this.authService.getAllDonsPublic().subscribe({
       next: (data) => {
         this.allDons = data;
@@ -48,14 +60,6 @@ export class BodyFrontComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erreur lors du chargement des dons publics :', err);
-      }
-    });
-    this.authService.getPublications().subscribe({
-      next: (data) => {
-        this.publications = data;
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des publications :', err);
       }
     });
     this.authService.getDonParticipants().subscribe({
@@ -68,6 +72,9 @@ export class BodyFrontComponent implements OnInit {
         console.error('Erreur lors du chargement des participants :', err);
       }
     });
+  
+
+    
   }
 
   onSearch() {
@@ -124,8 +131,9 @@ export class BodyFrontComponent implements OnInit {
       }
     });
   }
+
   
- 
+  
   
 
 }

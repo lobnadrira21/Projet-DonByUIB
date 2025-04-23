@@ -35,6 +35,8 @@ export class ParticiperDonComponent implements OnInit {
   onSubmit() {
     if (this.form.valid) {
       const montant = this.form.value.montant;
+      localStorage.setItem('id_don', this.idDon.toString());
+      localStorage.setItem('montant', montant.toString()); 
       this.http.post('http://127.0.0.1:5000/pay-flouci', { amount: montant }, {
         headers: {
           'Authorization': 'Bearer ' + this.authService.getToken(),
@@ -52,12 +54,13 @@ export class ParticiperDonComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error("Erreur paiement Flouci", err);
           alert("Erreur paiement : " + (err.error?.error || "inconnue"));
         }
       });
     }
   }
+  
+  
   
   
   

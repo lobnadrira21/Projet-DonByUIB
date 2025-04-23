@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { AuthService } from 'app/services/auth.service';
 
 @Component({
   selector: 'app-success',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './success.component.html',
   styleUrl: './success.component.scss'
 })
@@ -17,13 +18,14 @@ export class SuccessComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       let paymentId = params['payment_id'];
-      // Si pas dans l'URL, essayer de le récupérer depuis localStorage
       if (!paymentId) {
         paymentId = localStorage.getItem('payment_id') || '';
       }
@@ -32,12 +34,29 @@ export class SuccessComponent implements OnInit {
           .subscribe({
             next: (res: any) => {
               this.loading = false;
-              if(res.success && res.result.status === "SUCCESS") {
+              if (res.success && res.result.status === "SUCCESS") {
                 this.paymentStatus = 'Paiement confirmé ! Merci pour votre don.';
+                // Enregistrer la participation APRÈS succès paiement
+                const idDon = localStorage.getItem('id_don');
+                const montant = localStorage.getItem('montant');
+                if (idDon && montant) {
+                  this.authService.participatedons(+idDon, { montant: +montant }).subscribe({
+                    next: () => {
+                      // Participation enregistrée, on vide les valeurs
+                      localStorage.removeItem('id_don');
+                      localStorage.removeItem('montant');
+                    },
+                    error: (err) => {
+                      console.error('Erreur lors de la participation:', err);
+                    }
+                  });
+                }
+                setTimeout(() => {
+                  window.location.href = '/';
+                }, 2000);
               } else {
                 this.paymentStatus = 'Paiement non confirmé. Veuillez contacter le support.';
               }
-              // (Optionnel) nettoyer le localStorage pour éviter les confusions
               localStorage.removeItem('payment_id');
             },
             error: () => {
@@ -51,5 +70,8 @@ export class SuccessComponent implements OnInit {
       }
     });
   }
+  
+  
+  
 
 }

@@ -195,15 +195,21 @@ getDonById(id: number): Observable<any> {
   return this.http.get(`${this.apiUrl}/don/${id}`);
 }
 
-participatedons(id_don: number, data: any): Observable<any> {
-  const token = this.getToken();
-  const headers = new HttpHeaders({
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  });
-
-  return this.http.post(`${this.apiUrl}/participate/${id_don}`, data, { headers });
+// auth.service.ts
+participatedons(id_don: number, data: any) {
+  const token = this.getToken(); // Vérifie bien que c'est le token du DONATEUR
+  return this.http.post(
+    `http://127.0.0.1:5000/participate/${id_don}`,
+    data,
+    {
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
 }
+
 
 getDonParticipants(): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/don-participants`);
