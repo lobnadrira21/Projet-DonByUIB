@@ -29,6 +29,8 @@ import { DonDetailComponent } from './front/don-detail/don-detail.component';
 import { ParticiperDonComponent } from './front/participer-don/participer-don.component';
 import { SuccessComponent } from './front/success/success.component';
 import { FailComponent } from './front/fail/fail.component';
+import { ModifierprofilComponent } from './donator/modifierprofil/modifierprofil.component';
+import { BodyDonatorComponent } from './donator/body-donator/body-donator.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'client', pathMatch: 'full' },
@@ -76,12 +78,21 @@ export const routes: Routes = [
     path: 'dashboard-donator',
     component: EspaceDonatorComponent,
     canActivate: [AuthGuard, RoleGuard], // ✅ Apply guards
-    data: { role: 'donator' }
+    data: { role: 'donator' },
+    children: [
+      { path: '', redirectTo: 'welcome-donator', pathMatch: 'full' },
+      {path:'welcome-donator',component:BodyDonatorComponent},
+      {path:'modifier-profil', component: ModifierprofilComponent},
+     
+    ]
   },
+
+  // independant routes 
   { path: 'login', component: LoginComponent } ,
   { path: 'register', component: RegisterComponent } ,
   { path: 'ajouter-association', component: AjoutAssociationComponent },
   {path:'ajouter-publication', component: AjoutPublicationComponent},
+
 
  
 

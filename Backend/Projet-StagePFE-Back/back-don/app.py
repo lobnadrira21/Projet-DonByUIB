@@ -484,8 +484,77 @@ def modify_association():
         db.session.rollback()
         print("Error:", str(e))
         return jsonify({"error": str(e)}), 500
+    
+@app.route("/modify-profile-donateur", methods=["PUT"])
+@jwt_required()
+def modify_donator():
+    try:
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
 
+        if claims.get("role") != "donator":
+            return jsonify({"error": "Access denied! Only donators can modify their profile."}), 403
 
+        data = request.form if request.form else request.json
+
+        # Récupérer l'utilisateur
+        user = User.query.get(current_user_id)
+
+        if not user:
+            return jsonify({"error": "Donator not found!"}), 404
+
+        # Mettre à jour les champs
+        if "nom_complet" in data and data["nom_complet"].strip():
+            user.nom_complet = data["nom_complet"].strip()
+
+        if "email" in data and data["email"].strip():
+            # Vérifier l'unicité de l'email
+            existing_user = User.query.filter(User.email == data["email"].strip(), User.id != user.id).first()
+            if existing_user:
+                return jsonify({"error": "Email already exists!"}), 409
+            user.email = data["email"].strip()
+
+        if "telephone" in data and data["telephone"].strip():
+            user.telephone = data["telephone"].strip()
+
+        if "old_password" in data and "new_password" in data:
+            if not user.check_password(data["old_password"]):
+                return jsonify({"error": "Old password is incorrect!"}), 401
+            user.set_password(data["new_password"])
+
+        db.session.commit()
+
+        return jsonify({"message": "Donator profile updated successfully!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/get-profile-donator", methods=["GET"])
+@jwt_required()
+def get_profile_donator():
+    try:
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        if claims.get("role") != "donator":
+            return jsonify({"error": "Access denied!"}), 403
+
+        user = User.query.get(current_user_id)
+        if not user:
+            return jsonify({"error": "Donator profile not found"}), 404
+
+        return jsonify({
+            "nom_complet": user.nom_complet,
+            "email": user.email,
+            "telephone": user.telephone
+        }), 200
+
+    except Exception as e:
+        print("Error fetching donator profile:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+ 
 
 @app.route("/get-profile-association", methods=["GET"])
 @jwt_required()

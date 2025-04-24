@@ -14,10 +14,10 @@
             <div class="card-body text-center">
               <h4 class="card-title"></h4>
               <p class="card-description text-muted mb-1"></p>
-              <p class="card-description"></p>
-              <p class="card-description"><strong>Adresse:</strong></p>
-              <p class="card-description"><strong>Téléphone:</strong></p>
-              <p class="card-description"><strong>Type:</strong></p>
+              <p class="card-description">{{ profileForm.value.nom_complet }}</p>
+      
+              <p class="card-description"><strong>{{ profileForm.value.email }}</strong></p>
+              <p class="card-description"><strong>{{ profileForm.value.telephone }}</strong></p>
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@
                 <p class="lead">Que souhaitez-vous faire aujourd’hui ?</p>
     
                 <div class="d-flex justify-content-center gap-4 mt-4 flex-wrap">
-                  <a class="btn btn-danger btn-lg">
+                  <a class="btn btn-danger btn-lg"  [routerLink]="['/dashboard-donator', 'modifier-profil']">
                     <i class="material-icons">person</i> Modifier mon profil
                   </a>
                   <a class="btn btn-outline-danger btn-lg" >

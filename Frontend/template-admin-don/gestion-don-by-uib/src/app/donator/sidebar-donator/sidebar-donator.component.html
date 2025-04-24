@@ -1,6 +1,6 @@
 <div class="logo">
-    <a  class="simple-text">
-        <div class="logo-img">
+    <a  class="simple-text"  [routerLink] = "['/dashboard-donator','welcome-donator']">
+        <div class="logo-img"  >
             <img src="/assets/img/uiblogo.png"/>
         </div>
           donateur 
@@ -9,7 +9,7 @@
 <div class="sidebar-wrapper">
     <ul class="nav">
       <li routerLinkActive="active" class="nav-item">
-        <a class="nav-link" >
+        <a class="nav-link"  [routerLink] = "['/dashboard-donator','welcome-donator']" >
           <i class="material-icons">dashboard</i>
           <p>Espace</p>
         </a>
@@ -17,7 +17,7 @@
       
       <!-- ✅ Manually add User Profile -->
       <li routerLinkActive="active" class="nav-item">
-        <a class="nav-link" [routerLink]="">
+        <a class="nav-link" [routerLink]= "['/dashboard-donator', 'modifier-profil']"> 
           <i class="material-icons">person</i>
           <p>Modifier profil</p>
         </a>

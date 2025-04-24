@@ -215,6 +215,21 @@ getDonParticipants(): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/don-participants`);
 }
 
+getProfileDonator(): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });
 
+  return this.http.get<any>(`${this.apiUrl}/get-profile-donator`, { headers });
+}
+
+modifyProfileDonator(data: FormData): Observable<any> {
+  const headers = {
+    Authorization: `Bearer ${this.getToken()}`,
+  };
+
+  return this.http.put(`${this.apiUrl}/modify-profile-donateur`, data, { headers });
+}
 
 }
