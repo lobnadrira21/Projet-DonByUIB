@@ -1,0 +1,74 @@
+<div class="main-content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+  
+        <!-- 🖼️ Image Preview + Upload -->
+        <div class="col-md-4">
+          <div class="card card-profile">
+            <div class="card-avatar">
+              <a href="javascript:void(0)">
+                <img class="img" [src]="imagePreview || 'assets/img/don-default.png'" />
+              </a>
+            </div>
+            <div class="card-body">
+              <h4 class="card-title">{{ donForm.value.titre }}</h4>
+              <input type="file" (change)="onFileSelected($event)" accept="image/*" class="form-control mt-2">
+            </div>
+          </div>
+        </div>
+  
+        <!-- 📝 Formulaire -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header card-header-danger">
+              <h4 class="card-title">Modifier Don</h4>
+              <p class="card-category">Tu peux modifier les détails du don ici</p>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="donForm" (ngSubmit)="onSubmit()">
+  
+                <div class="row">
+                  <div class="col-md-6">
+                    <mat-form-field class="example-full-width">
+                      <input matInput placeholder="Titre" formControlName="titre">
+                    </mat-form-field>
+                  </div>
+  
+                  <div class="col-md-6">
+                    <mat-form-field class="example-full-width">
+                      <input matInput placeholder="Objectif (TND)" type="number" formControlName="objectif">
+                    </mat-form-field>
+                  </div>
+                </div>
+  
+                <div class="row">
+                  <div class="col-md-12">
+                    <mat-form-field class="example-full-width">
+                      <textarea matInput placeholder="Description" formControlName="description"></textarea>
+                    </mat-form-field>
+                  </div>
+                </div>
+  
+                <div class="row">
+                  <div class="col-md-6">
+                    <mat-form-field class="example-full-width">
+                      <input matInput type="date" placeholder="Date fin collecte" formControlName="date_fin_collecte">
+                    </mat-form-field>
+                  </div>
+                </div>
+  
+                <!-- Submit -->
+                <button mat-raised-button color="warn" type="submit" class="pull-right" [disabled]="donForm.invalid">
+                  Modifier le Don
+                </button>
+  
+                <div class="clearfix"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  

@@ -89,6 +89,33 @@ getAssociations(): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/associations`, { headers });
 }
 
+// get association by id 
+
+getAssociationById(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.get(`${this.apiUrl}/association/${id}`, { headers });
+}
+ /** Modify account association */
+ modifyAccount(id: number, data: FormData): Observable<any> {
+  const headers = {
+    Authorization: `Bearer ${this.getToken()}`,
+  };
+  return this.http.put(`${this.apiUrl}/modify-compte-association/${id}`, data, { headers });
+}
+
+/** supprimer association par l'admin */
+deleteAssociation(id: number): Observable<any> {
+  const headers = {
+    Authorization: `Bearer ${this.getToken()}`
+  };
+  return this.http.delete(`${this.apiUrl}/delete-compte-association/${id}`, { headers });
+}
+
+
  /** Modify association profile */
  modifyProfile(data: FormData): Observable<any> {
   const headers = {
@@ -155,6 +182,23 @@ updatePublication(id: number, data: any): Observable<any> {
   });
 
   return this.http.put(`${this.apiUrl}/update-publication/${id}`, data, { headers });
+}
+
+updateDon(id: number, data: FormData): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    
+  });
+  return this.http.put(`${this.apiUrl}/update-don/${id}`, data, { headers });
+}
+deleteDon(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.delete(`${this.apiUrl}/delete-don/${id}`, { headers });
 }
 deletePublication(id: number): Observable<any> {
   const token = this.getToken();
@@ -230,6 +274,76 @@ modifyProfileDonator(data: FormData): Observable<any> {
   };
 
   return this.http.put(`${this.apiUrl}/modify-profile-donateur`, data, { headers });
+}
+
+// Pour récupérer tous les dons (admin)
+getAllDonsAdmin(): Observable<any[]> {
+  const token = this.getToken(); 
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`  
+  });
+
+  return this.http.get<any[]>(`${this.apiUrl}/admin/dons`, { headers });
+}
+
+
+// Valider un don
+validerDon(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.put(`${this.apiUrl}/don/${id}/valider`, {}, { headers });
+}
+
+// Refuser un don
+refuserDon(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.put(`${this.apiUrl}/don/${id}/refuser`, {}, { headers });
+}
+
+// Valider une publication
+validerPublication(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.put(`${this.apiUrl}/publication/${id}/valider`, {}, { headers });
+}
+
+getAllPublicationAdmin(): Observable<any[]> {
+  const token = this.getToken(); 
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`  
+  });
+
+  return this.http.get<any[]>(`${this.apiUrl}/admin/publications`, { headers });
+}
+
+getMesPaiements(): Observable<any[]> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+  return this.http.get<any[]>(`${this.apiUrl}/mes-paiements`, { headers });
+}
+
+getRecuPaiement(id_participation: number): Observable<Blob> {
+  const token = this.getToken();  // Récupère le JWT du localStorage
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.get(`http://127.0.0.1:5000/recu-pdf/${id_participation}`, {
+    headers,
+    responseType: 'blob'  // Pour recevoir un fichier PDF
+  });
 }
 
 }

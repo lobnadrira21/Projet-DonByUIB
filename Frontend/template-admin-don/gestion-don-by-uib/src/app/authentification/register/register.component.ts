@@ -48,50 +48,98 @@ export class RegisterComponent implements OnInit {
   }
 
 
-  register() {
-    if (!this.email || !this.password || !this.nom_complet || !this.telephone) {
-      this.errorMessage = "All fields are required.";
-      return;
-    }
+ register() {
+  this.errorMessage = '';
 
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = "Passwords do not match.";
-      return;
-    }
-
-    const userData = {
-      email: this.email,
-      password: this.password,
-      nom_complet: this.nom_complet,
-      telephone: this.telephone,
-      role: this.role
-    };
-
-    this.authService.register(userData).subscribe({
-      next: (response) => {
-        console.log('Registration successful:', response);
-        
-        // ✅ Save token & role (if returned from backend)
-        if (response.access_token) {
-          this.authService.saveToken(response.access_token, response.role, response.username);
-        }
-  
-        // ✅ Redirect based on role
-        if (response.role === 'donator') {
-          this.router.navigate(['/dashboard-donator']); // Redirect Donators
-        } else {
-          this.router.navigate(['/login']); // Default redirect if no role
-        }
-      },
-      error: (error) => {
-        console.error('Registration failed:', error);
-        this.errorMessage = error.error?.error || "An error occurred. Please try again.";
-      }
-    });
+  if (!this.email || !this.password || !this.nom_complet || !this.telephone) {
+    this.errorMessage = "Tous les champs sont requis.";
+    return;
   }
+
+  if (!this.isValidNomComplet()) {
+    this.errorMessage = "Le nom complet doit contenir au maximum 40 caractères.";
+    return;
+  }
+  if (!this.isValidEmail()) {
+  this.errorMessage = "L'adresse email n'est pas valide.";
+  return;
+}
+
+
+  if (!this.isValidTelephone()) {
+    this.errorMessage = "Le numéro de téléphone doit comporter exactement 8 chiffres.";
+    return;
+  }
+
+  if (!this.isStrongPassword()) {
+    this.errorMessage = "Le mot de passe doit contenir une majuscule, un chiffre et un caractère spécial.";
+    return;
+  }
+
+  if (this.password !== this.confirmPassword) {
+    this.errorMessage = "Les mots de passe ne correspondent pas.";
+    return;
+  }
+
+  const userData = {
+    email: this.email,
+    password: this.password,
+    nom_complet: this.nom_complet,
+    telephone: this.telephone,
+    role: this.role
+  };
+
+  this.authService.register(userData).subscribe({
+    next: (response) => {
+      if (response.access_token) {
+        this.authService.saveToken(response.access_token, response.role, response.username);
+      }
+
+      if (response.role === 'donator') {
+        this.router.navigate(['/dashboard-donator']);
+      } else {
+        this.router.navigate(['/login']);
+      }
+    },
+    error: (error) => {
+      console.error('Registration failed:', error);
+      this.errorMessage = error.error?.error || "Une erreur est survenue.";
+    }
+  });
+}
+
   
 
   goToHome() {
     this.router.navigate(['/']);
   }
+
+
+ isValidNomComplet(): boolean {
+  const regex = /^[A-Za-zÀ-ÿ\s\-]{1,40}$/;
+  return regex.test(this.nom_complet);
+}
+
+isValidEmail(): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(this.email);
+}
+
+hideTelError: boolean = false;
+
+isValidTelephone(): boolean {
+  const phoneRegex = /^\d{8}$/;
+  return phoneRegex.test(this.telephone);
+}
+
+
+
+hidePwdError: boolean = false;
+
+isStrongPassword(): boolean {
+  const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+  return regex.test(this.password);
+}
+
+
 }

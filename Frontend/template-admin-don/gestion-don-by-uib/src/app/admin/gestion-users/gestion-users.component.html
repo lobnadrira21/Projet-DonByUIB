@@ -37,10 +37,10 @@
                                     <td>{{ association.telephone }}</td>
                                     <td>{{ association.type_association }}</td>
                                     <td class="td-actions text-right">
-                                      <button mat-raised-button class="btn btn-primary btn-sm">
+                                      <button mat-raised-button class="btn btn-primary btn-sm"  (click)="modifierAssociation(association.id_association)"   >
                                         <i class="material-icons">edit</i>
                                       </button>
-                                      <button mat-raised-button class="btn btn-danger btn-sm">
+                                      <button mat-raised-button class="btn btn-danger btn-sm"  (click)="deleteAssociation(association.id_association)  " >
                                         <i class="material-icons">delete</i>
                                       </button>
                                     </td>

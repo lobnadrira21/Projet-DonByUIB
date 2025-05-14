@@ -1,0 +1,90 @@
+<div class="main-content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-12 table-container">
+          <div class="card">
+            <div class="card-header card-header-danger d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="card-title">Validation des publications</h4>
+                <p class="card-category">La table de gestion des publications en attente de validation</p>
+              </div>
+            </div>
+  
+            <div class="card-body">
+              <div class="table-responsive">
+  
+                <!-- 🟨 Filtre + compteur -->
+                <div class="d-flex justify-content-end mb-3">
+                  <label for="filterStatut" class="me-2 align-self-center">Filtrer par statut :</label>
+                  <select class="custom-select custom-select-sm w-auto" id="filterStatut" [(ngModel)]="filterStatut">
+                    <option value="">Tous</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="valide">Validé</option>
+                    <option value="refuse">Refusé</option>
+                  </select>
+  
+                  <span class="ms-3 align-self-center text-muted">
+                    ({{ getPublicationFiltres().length }} publications affichées)
+                  </span>
+                </div>
+  
+                <!-- 🟩 Table -->
+                <table class="table">
+                  <thead class="text-primary">
+                    <tr>
+                      <th>#</th>
+                      <th>Titre</th>
+                      <th>contenu</th>
+                      <th>date_publication</th>
+                      <th>Statut</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let pub of getPublicationFiltres(); let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ pub.titre }}</td>
+                      <td>{{ pub.contenu }} TND</td>
+                      <td>{{ pub.date_publication }} TND</td>
+                      <td>{{ pub.Statut }}</td>
+                     
+                      <td>
+                        <span class="badge"
+                          [ngClass]="{
+                            'bg-warning': pub.statut?.toLowerCase() === 'en_attente',
+                            'bg-success': pub.statut?.toLowerCase() === 'valide',
+                            'bg-danger': pub.statut?.toLowerCase() === 'refuse'
+                          }">
+                          {{ pub.statut?.toLowerCase() === 'en_attente' ? 'En attente' :
+                             pub.statut?.toLowerCase() === 'valide' ? 'Validé' : 'Refusé' }}
+                        </span>
+                      </td>
+                      <td class="td-actions text-right">
+                        <button class="btn btn-success btn-sm me-1"
+                                (click)="valider(pub.id_publication)"
+                                [disabled]="pub.statut?.toLowerCase() !== 'en_attente'">
+                          <i class="material-icons">check</i>
+                        </button>
+                      <button class="btn btn-danger btn-sm">
+                                
+                              
+                          <i class="material-icons">close</i>
+                        </button> 
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+  
+                <!-- 🔴 Message si aucune publication -->
+                <div *ngIf="getPublicationFiltres().length === 0">
+                  <div class="alert alert-warning text-center">Aucune publication à afficher.</div>
+                </div>
+  
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

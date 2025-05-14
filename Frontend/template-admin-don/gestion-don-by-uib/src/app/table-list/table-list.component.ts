@@ -25,6 +25,7 @@ import { AjoutDonComponent } from 'app/components/ajout-don/ajout-don.component'
           // ✅ Required for buttons
         MatIconModule,
         ReactiveFormsModule
+
         
   ],
 
@@ -62,6 +63,20 @@ export class TableListComponent implements OnInit {
         this.authService.getDons().subscribe(dons => this.dons = dons);
       }
     });
+  }
+
+  deleteDon(id: number) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce don ?")) {
+      this.authService.deleteDon(id).subscribe({
+        next: (res) => {
+          console.log(res.message);
+          this.authService.getDons(); 
+        },
+        error: (err) => {
+          console.error("Erreur de suppression :", err);
+        }
+      });
+    }
   }
 
 }

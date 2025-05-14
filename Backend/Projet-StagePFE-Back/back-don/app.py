@@ -41,6 +41,8 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'lobnadrira21@gmail.com'
 app.config['MAIL_PASSWORD'] = 'afyw aypt zoqx mrvj'
+app.config['MAIL_DEFAULT_SENDER'] = 'DonByUIB <admin@donbyuib.tn>'
+
 mail = Mail(app)  
 
 
@@ -109,12 +111,14 @@ class Don(db.Model):
 
     id_don = db.Column(db.Integer, primary_key=True)
     titre = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.String(600), nullable=True)
     objectif = db.Column(db.Float, nullable=False)
     montant_collecte = db.Column(db.Float, default=0.0)
     date_fin_collecte = db.Column(db.Date, nullable=False)
     recu_don = db.Column(db.String(255), nullable=True)
     photo_don = db.Column(db.String(255), nullable=True)
+    statut = db.Column(db.String(20), default="en_attente")  # "en_attente", "valide", "refuse"
+
     # clé etrangere avec cascade
     id_association = db.Column(
         db.Integer,
@@ -155,6 +159,7 @@ class Publication(db.Model):
     nb_likes = db.Column(db.Integer, default=0)
     nb_commentaires = db.Column(db.Integer, default=0)
     nb_partages = db.Column(db.Integer, default=0)
+    statut = db.Column(db.String(20), default="en_attente")  # "en_attente", "valide", "refuse"
 
     # clé etrangére avec CASCADE (si une association a été supprimée, ses publications seront supprimées)
     id_association = db.Column(
@@ -173,6 +178,8 @@ class Commentaire(db.Model):
     id_commentaire = db.Column(db.Integer, primary_key=True)
     contenu = db.Column(db.Text, nullable=False)
     date_commentaire = db.Column(db.Date, nullable=False)
+    sentiment = db.Column(db.String(20), nullable=True)  # "positif", "neutre", "négatif"
+
 
     # clé etrangére avec CASCADE (si une publication a été supprimée, ses commentaires seront supprimées)
     id_publication = db.Column(
@@ -193,8 +200,9 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, default=False)
 
     id_association = db.Column(db.Integer, db.ForeignKey("associations.id_association", ondelete="CASCADE"), nullable=False)
-
+    id_publication = db.Column(db.Integer, db.ForeignKey("publications.id_publication", ondelete="CASCADE"), nullable=True)
     association = db.relationship("Association", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))
+    publication = db.relationship("Publication", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))
 
 
 # ---------- Methods ---------
@@ -212,6 +220,21 @@ def handle_options_request():
 
 
 
+import re
+
+# Fonction de validation
+def is_valid_nom_complet(nom):
+     return bool(re.fullmatch(r"[A-Za-zÀ-ÿ\s\-]{1,40}", nom))
+def is_valid_email(email):
+    # Format basique d’un email
+    return bool(re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email))
+
+def is_valid_telephone(tel):
+    return bool(re.fullmatch(r"\d{8}", tel))
+
+def is_strong_password(password):
+    return bool(re.fullmatch(r"^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$", password))
+
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
@@ -219,10 +242,22 @@ def register():
     password = data.get("password")
     nom_complet = data.get("nom_complet")
     telephone = data.get("telephone")
-    role = data.get("role", "donator")  # Default role is 'donator' if not provided
+    role = data.get("role", "donator")
 
     if not email or not password or not nom_complet or not telephone:
         return jsonify({"error": "All fields are required"}), 400
+
+    if not is_valid_email(email):
+        return jsonify({"error": "L'email n'est pas valide."}), 400
+
+    if not is_valid_nom_complet(nom_complet):
+        return jsonify({"error": "Le nom complet ne doit contenir que des lettres, espaces ou tirets (max 40 caractères)."}), 400
+
+    if not is_valid_telephone(telephone):
+        return jsonify({"error": "Le numéro de téléphone doit contenir exactement 8 chiffres."}), 400
+
+    if not is_strong_password(password):
+        return jsonify({"error": "Le mot de passe doit contenir au moins une lettre majuscule, un chiffre, et un caractère spécial."}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already exists"}), 409
@@ -237,6 +272,7 @@ def register():
     db.session.commit()
 
     return jsonify({"message": f"{role.capitalize()} registered successfully"}), 201
+
 
 
 # Login Route
@@ -421,15 +457,83 @@ def get_associations():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# modifier association par admin 
+@app.route("/modify-compte-association/<int:id>", methods=["PUT"])
+@jwt_required()
+def modify_compte_association(id):
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "admin":
+            return jsonify({"error": "Access denied!"}), 403
 
+        data = request.form
+        association = Association.query.get(id)
+        user = User.query.filter_by(email=association.email).first()
+
+        if not association or not user:
+            return jsonify({"error": "Association not found!"}), 404
+
+        # Mise à jour des champs...
+        if "nom_complet" in data:
+            association.nom_complet = data["nom_complet"].strip()
+
+        if "email" in data:
+            existing_user = User.query.filter(User.email == data["email"], User.id != user.id).first()
+            if existing_user:
+                return jsonify({"error": "Email already exists!"}), 409
+            association.email = data["email"].strip()
+            user.email = data["email"].strip()
+
+        if "description_association" in data:
+            association.description_association = data["description_association"].strip()
+        if "telephone" in data:
+            association.telephone = data["telephone"].strip()
+        if "adresse" in data:
+            association.adresse = data["adresse"].strip()
+        if "type_association" in data:
+            association.type_association = data["type_association"].strip()
+
+        db.session.commit()
+        return jsonify({"message": "Association updated successfully!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# supprimer association par l'admin
+@app.route("/delete-compte-association/<int:id_association>", methods=["DELETE"])
+@jwt_required()
+def delete_compte_association(id_association):
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "admin":
+            return jsonify({"error": "Access denied! Only admin can delete an association."}), 403
+
+        association = Association.query.get(id_association)
+        if not association:
+            return jsonify({"error": "Association not found."}), 404
+
+        user = User.query.filter_by(email=association.email).first()
+
+        # Supprimer d'abord l'utilisateur lié (optionnel selon ton modèle)
+        if user:
+            db.session.delete(user)
+
+        db.session.delete(association)
+        db.session.commit()
+
+        return jsonify({"message": "Association deleted successfully!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/modify-profile-association", methods=["PUT"])
 @jwt_required()
 def modify_association():
     try:
-        current_user_id = get_jwt_identity()
         claims = get_jwt()
-
         if claims.get("role") != "association":
             return jsonify({"error": "Access denied! Only associations can modify their profile."}), 403
 
@@ -469,7 +573,6 @@ def modify_association():
                 return jsonify({"error": "Old password is incorrect!"}), 401
             user.password_hash = generate_password_hash(data["new_password"])
 
-        # ✅ Sauvegarde du fichier photo
         if file:
             filename = secure_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -477,13 +580,12 @@ def modify_association():
             association.photo = f"/static/uploads/{filename}"
 
         db.session.commit()
-
         return jsonify({"message": "Association profile updated successfully!"}), 200
 
     except Exception as e:
         db.session.rollback()
-        print("Error:", str(e))
         return jsonify({"error": str(e)}), 500
+
     
 @app.route("/modify-profile-donateur", methods=["PUT"])
 @jwt_required()
@@ -554,8 +656,36 @@ def get_profile_donator():
         print("Error fetching donator profile:", str(e))
         return jsonify({"error": str(e)}), 500
 
- 
+ # get by id the association infos
+@app.route("/association/<int:id>", methods=["GET"])
+@jwt_required()
+def get_association_detail(id):
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "admin":
+            return jsonify({"error": "Access denied!"}), 403
 
+        association = Association.query.get(id)
+
+        if not association:
+            return jsonify({"error": "Association non trouvée."}), 404
+
+      
+
+        result = {
+            "nom_complet": association.nom_complet,
+            "email": association.email,
+            "description_association": association.description_association,
+            "telephone": association.telephone,
+            "adresse": association.adresse,
+            "type_association": association.type_association,
+        }
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+# get profile of an association
 @app.route("/get-profile-association", methods=["GET"])
 @jwt_required()
 def get_profile_association():
@@ -600,7 +730,6 @@ def create_don():
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
 
-        # 🔍 Trouver l'association liée à cet utilisateur
         association = Association.query.filter_by(email=user.email).first()
         if not association:
             return jsonify({"error": "Aucune association liée à ce compte."}), 404
@@ -608,16 +737,27 @@ def create_don():
         data = request.form
         file = request.files.get("photo_file")
 
-        # ✅ Champs requis
+        # Champs requis
         titre = data.get("titre")
-        objectif = data.get("objectif")
-        date_fin_collecte = data.get("date_fin_collecte")
+        objectif_str = data.get("objectif")
+        date_fin_collecte_str = data.get("date_fin_collecte")
 
-        if not titre or not objectif or not date_fin_collecte:
+        if not titre or not objectif_str or not date_fin_collecte_str:
             return jsonify({"error": "Titre, objectif et date_fin_collecte sont obligatoires."}), 400
 
+        # Conversion float
+        try:
+            objectif = float(objectif_str)
+        except Exception:
+            return jsonify({"error": "L'objectif doit être un nombre"}), 400
 
-        # ✅ Sauvegarder l’image si elle est présente
+        # Conversion date
+        try:
+            date_fin_collecte = datetime.strptime(date_fin_collecte_str, "%Y-%m-%d").date()
+        except Exception:
+            return jsonify({"error": "La date doit être au format AAAA-MM-JJ"}), 400
+
+        # Image
         photo_path = None
         if file:
             filename = secure_filename(file.filename)
@@ -625,19 +765,18 @@ def create_don():
             file.save(file_path)
             photo_path = f"/static/uploads/{filename}"
 
-        # ✅ Créer l’objet Don
+        # Créer Don
         new_don = Don(
-        titre=titre.strip(),
-        description=data.get("description", "").strip(),
-        objectif=float(objectif),  # ✅ nouveau champ
-        montant_collecte=0.0,      # ✅ commence à 0
-        date_fin_collecte=date_fin_collecte,
-        recu_don=None,
-        photo_don=photo_path,
-        id_association=association.id_association,
-        id_utilisateur=current_user_id
-)
-
+            titre=titre.strip(),
+            description=data.get("description", "").strip(),
+            objectif=objectif,
+            montant_collecte=0.0,
+            date_fin_collecte=date_fin_collecte,
+            photo_don=photo_path,
+            id_association=association.id_association,
+            id_utilisateur=current_user_id,
+            statut="en_attente",
+        )
 
         db.session.add(new_don)
         db.session.commit()
@@ -648,10 +787,252 @@ def create_don():
         db.session.rollback()
         print("Erreur lors de la création du don:", str(e))
         return jsonify({"error": str(e)}), 500
+    
+# modifier don par l'association
+@app.route("/update-don/<int:id_don>", methods=["PUT"])
+
+@jwt_required()
+def update_don(id_don):
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "association":
+            return jsonify({"error": "Accès refusé : seules les associations peuvent modifier un don."}), 403
+
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        association = Association.query.filter_by(email=user.email).first()
+
+        if not association:
+            return jsonify({"error": "Association non trouvée."}), 404
+
+        don = Don.query.filter_by(id_don=id_don, id_association=association.id_association).first()
+        if not don:
+            return jsonify({"error": "Don introuvable ou non autorisé."}), 404
+
+        # Récupérer les données
+        data = request.form
+        file = request.files.get("photo_file")
+
+        if "titre" in data:
+            don.titre = data["titre"].strip()
+
+        if "description" in data:
+            don.description = data["description"].strip()
+
+        if "objectif" in data:
+            try:
+                don.objectif = float(data["objectif"])
+            except ValueError:
+                return jsonify({"error": "L'objectif doit être un nombre"}), 400
+
+        if "date_fin_collecte" in data:
+            try:
+                don.date_fin_collecte = datetime.strptime(data["date_fin_collecte"], "%Y-%m-%d").date()
+            except ValueError:
+                return jsonify({"error": "Date invalide. Format attendu : AAAA-MM-JJ"}), 400
+
+        # 📷 Gestion du changement de photo
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            don.photo_don = f"/static/uploads/{filename}"
+
+        db.session.commit()
+        return jsonify({"message": "✅ Don mis à jour avec succès."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("Erreur modification don :", str(e))
+        return jsonify({"error": str(e)}), 500
+
+# supprimer don par l'association
+@app.route("/delete-don/<int:id_don>", methods=["DELETE"])
+@jwt_required()
+def delete_don(id_don):
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "association":
+            return jsonify({"error": "Accès refusé : seules les associations peuvent supprimer un don."}), 403
+
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        association = Association.query.filter_by(email=user.email).first()
+
+        don = Don.query.filter_by(id_don=id_don, id_association=association.id_association).first()
+        if not don:
+            return jsonify({"error": "Don introuvable ou accès non autorisé."}), 404
+
+        db.session.delete(don)
+        db.session.commit()
+        return jsonify({"message": "🗑️ Don supprimé avec succès."}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# valider don
+@app.route("/don/<int:id_don>/valider", methods=["PUT"])
+@jwt_required()
+def valider_don(id_don):
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    don = Don.query.get(id_don)
+    if not don:
+        return jsonify({"error": "Don introuvable"}), 404
+
+    don.statut = "valide"
+
+    # ✅ Notification
+    notif = Notification(
+        contenu=f"Le don '{don.titre}' a été validé par l’administrateur.",
+        id_association=don.id_association,
+        date=datetime.utcnow()
+    )
+    db.session.add(notif)
+
+    # ✅ Email (optionnel)
+    try:
+        assoc = don.association
+        if assoc and assoc.email:
+            msg = Message(
+    subject="Validation de votre don",
+    sender=app.config.get("MAIL_DEFAULT_SENDER", "admin@donbyuib.tn"),
+    recipients=[assoc.email],
+    body=f"Bonjour {assoc.nom_complet},\n\nVotre don intitulé '{don.titre}' a été validé par l'administrateur.\n\nMerci."
+)
+
+            mail.send(msg)
+    except Exception as e:
+        print("Erreur lors de l’envoi de l’email :", e)
+
+    db.session.commit()
+    return jsonify({"message": "Don validé avec succès"}), 200
+
+
+# Refuser don
+
+@app.route("/don/<int:id_don>/refuser", methods=["PUT"])
+@jwt_required()
+def refuser_don(id_don):
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    don = Don.query.get(id_don)
+    if not don:
+        return jsonify({"error": "Don introuvable"}), 404
+
+    don.statut = "refuse"
+
+    # ✅ Notification
+    notif = Notification(
+        contenu=f"Le don '{don.titre}' a été refusé par l’administrateur.",
+        id_association=don.id_association,
+        date=datetime.utcnow()
+    )
+    db.session.add(notif)
+
+    # ✅ Email (optionnel)
+    try:
+        assoc = don.association
+        if assoc and assoc.email:
+            msg = Message(
+                subject="Refus de votre don",
+                sender=app.config.get("MAIL_DEFAULT_SENDER", "admin@donbyuib.tn"),
+                recipients=[assoc.email],
+                body=f"Bonjour {assoc.nom_complet},\n\nVotre don intitulé '{don.titre}' a été refusé par l'administrateur.\n\nMerci."
+            )
+            mail.send(msg)
+    except Exception as e:
+        print("Erreur lors de l’envoi de l’email :", e)
+
+    db.session.commit()
+    return jsonify({"message": "Don refusé avec succès"}), 200
+
+
+# get dons pour l'admin 
+
+@app.route("/admin/dons", methods=["GET"])
+@jwt_required()
+def get_all_dons_admin():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    dons = Don.query.all()
+    result = []
+    for don in dons:
+        result.append({
+            "id_don": don.id_don,
+            "titre": don.titre,
+            "description": don.description,
+            "objectif": don.objectif,
+            "montant_collecte": don.montant_collecte,
+            "date_fin_collecte": don.date_fin_collecte.isoformat(),
+            "photo_don": don.photo_don,
+            "statut": don.statut,
+            "association": don.association.nom_complet if don.association else "Inconnue"
+        })
+
+    return jsonify(result), 200
+
+# valider publication
+
+@app.route("/publication/<int:id_publication>/valider", methods=["PUT"])
+@jwt_required()
+def valider_publication(id_publication):
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    publication = Publication.query.get(id_publication)
+    if not publication:
+        return jsonify({"error": "publication introuvable"}), 404
+
+    publication.statut = "valide"
+
+    # ✅ Notification
+    notif = Notification(
+        contenu=f"La publication '{publication.titre}' a été validée par l’administrateur.",
+        id_publication=publication.id_publication,
+        id_association=publication.id_association,
+        date=datetime.utcnow()
+    )
+    db.session.add(notif)
+
+
+    db.session.commit()
+    return jsonify({"message": "Publication validé avec succès"}), 200
+
+# get all publications (admin)
+
+@app.route("/admin/publications", methods=["GET"])
+@jwt_required()
+def get_all_publication_admin():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    publications = Publication.query.all()
+    result = []
+    for publication in publications:
+        result.append({
+            "id_publication": publication.id_publication,
+            "titre": publication.titre,
+            "contenu": publication.contenu,
+            "date_publication": publication.date_publication.isoformat(),
+            "statut":publication.statut,
+        })
+
+    return jsonify(result), 200
 
 
 
-# get dons
+
+# get dons by associations
 
 @app.route("/dons", methods=["GET"])
 @jwt_required()
@@ -688,7 +1069,8 @@ def get_dons():
 @app.route("/public-dons", methods=["GET"])
 def get_all_dons_public():
     try:
-        dons = Don.query.all()
+        # ❗ Exclure les dons refusés et en attente
+        dons = Don.query.filter(Don.statut == "valide").all()
 
         result = []
         for don in dons:
@@ -700,8 +1082,8 @@ def get_all_dons_public():
                 "objectif": don.objectif,
                 "date_fin_collecte": don.date_fin_collecte.isoformat(),
                 "photo_don": don.photo_don,
-                "nom_organisateur": don.association.nom_complet if don.association else "Inconnu"
-
+                "nom_organisateur": don.association.nom_complet if don.association else "Inconnu",
+                "id_association": don.id_association
             })
 
         return jsonify(result), 200
@@ -709,6 +1091,28 @@ def get_all_dons_public():
     except Exception as e:
         print("Erreur lors de la récupération des dons:", str(e))
         return jsonify({"error": str(e)}), 500
+# voir les détails de l'association en public
+@app.route("/public-association/<int:id>", methods=["GET"])
+def get_public_association_detail(id):
+    try:
+        association = Association.query.get(id)
+
+        if not association:
+            return jsonify({"error": "Association non trouvée."}), 404
+
+        result = {
+            "nom_complet": association.nom_complet,
+            "photo": association.photo,
+            "description_association": association.description_association,
+            "telephone": association.telephone,
+            "adresse": association.adresse
+        }
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
     
 #récupérer les détails des dons
 @app.route("/don/<int:id>", methods=["GET"])
@@ -838,7 +1242,8 @@ def create_publication():
             titre=titre.strip(),
             contenu=contenu.strip(),
             date_publication=datetime.utcnow().date(),
-            id_association=association.id_association
+            id_association=association.id_association,
+            statut="en_attente",
         )
 
         db.session.add(new_pub)
@@ -881,7 +1286,8 @@ def get_publications():
             commentaires = [
                 {
                     "nom": User.query.get(com.id_user).nom_complet if com.id_user else "Utilisateur",
-                    "contenu": com.contenu
+                    "contenu": com.contenu,
+                    "sentiment": com.sentiment
                 }
                 for com in pub.commentaires 
             ]
@@ -924,7 +1330,8 @@ def get_publication_detail(id):
             {
                 "id_commentaire": c.id_commentaire,
                 "contenu": c.contenu,
-                "date_commentaire": c.date_commentaire.isoformat()
+                "date_commentaire": c.date_commentaire.isoformat(),
+                "sentiment":c.sentiment
             } for c in publication.commentaires
         ]
 
@@ -1022,8 +1429,6 @@ def delete_publication(id):
 
 # add commentaire 
 
-
-
 @app.route("/add-comment/<int:publication_id>", methods=["POST"])
 @jwt_required()
 def add_comment(publication_id):
@@ -1035,9 +1440,6 @@ def add_comment(publication_id):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
 
-        if not user:
-            return jsonify({"error": "Utilisateur non trouvé."}), 404
-
         publication = Publication.query.get(publication_id)
         if not publication:
             return jsonify({"error": "Publication non trouvée."}), 404
@@ -1048,9 +1450,15 @@ def add_comment(publication_id):
         if not contenu_commentaire or not contenu_commentaire.strip():
             return jsonify({"error": "Le contenu du commentaire est requis."}), 400
 
+        # Analyse sentiment avec VADER
+        scores = analyze_comment(contenu_commentaire)
+        sentiment_label = get_sentiment_label(scores["compound"], contenu_commentaire)
+
+
         new_comment = Commentaire(
             contenu=contenu_commentaire.strip(),
             date_commentaire=datetime.utcnow().date(),
+            sentiment=sentiment_label,
             id_publication=publication_id,
             id_user=current_user_id
         )
@@ -1062,18 +1470,15 @@ def add_comment(publication_id):
             date=datetime.utcnow(),
             id_association=publication.id_association
         )
-        print("🟢 Notification à enregistrer :", notif.contenu)
-
         db.session.add(notif)
         publication.nb_commentaires += 1
         db.session.commit()
 
-        return jsonify({"message": "✅ Commentaire ajouté avec succès."}), 201
+        return jsonify({"message": "✅ Commentaire ajouté avec succès.", "sentiment": sentiment_label}), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
 
     
 #get notification 
@@ -1207,6 +1612,144 @@ def like_publication(publication_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+# analyser sentiment d'un donateur
+
+from deep_translator import GoogleTranslator
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+def analyze_comment(comment_text):
+    # Traduire le texte en anglais
+    translated = GoogleTranslator(source='auto', target='en').translate(comment_text)
+    analyzer = SentimentIntensityAnalyzer()
+    scores = analyzer.polarity_scores(translated)
+    return scores
+
+
+def get_sentiment_label(compound_score, comment):
+    comment = comment.lower()
+    mots_positifs = ['bravo', 'merci', 'parfait', 'génial', 'félicitations', 'don', 'aider','bonne','bon courage','meilleur']
+
+    if any(mot in comment for mot in mots_positifs):
+        return "positif"
+    elif compound_score >= 0.05:
+        return "positif"
+    elif compound_score <= -0.05:
+        return "négatif"
+    else:
+        return "neutre"
+
+
+# get paiements
+@app.route("/mes-paiements", methods=["GET"])
+@jwt_required()
+def get_paiements_donator():
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "donator":
+            return jsonify({"error": "Accès refusé"}), 403
+
+        current_user_id = get_jwt_identity()
+
+        participations = Participation.query.filter_by(id_user=current_user_id).join(Don).all()
+        result = []
+        for p in participations:
+            result.append({
+                "id_participation": p.id_participation,
+                "titre_don": p.don.titre,
+                "montant": p.montant,
+                "date": p.date_participation.isoformat(),
+                "photo_don": p.don.photo_don
+            })
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+#recu de paiement
+from flask import make_response, send_file
+from xhtml2pdf import pisa
+from io import BytesIO
+import qrcode
+import base64
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import os
+
+@app.route('/recu-pdf/<int:id_participation>', methods=['GET'])
+@jwt_required()
+def generate_recu_pdf(id_participation):
+    participation = Participation.query.get(id_participation)
+    if not participation:
+        return jsonify({"error": "Participation introuvable"}), 404
+
+    don = participation.don
+    user = participation.user
+
+    """ # 🧠 Génération QR Code dynamique
+    association_id = don.id_association
+    qr_data = f"http://localhost:4200/#/detail-association/{association_id}"
+
+    qr_img = qrcode.make(qr_data)
+    qr_buffer = BytesIO()
+    qr_img.save(qr_buffer, format="PNG")
+    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8") """
+
+    # 📷 Logo UIB (sous static/uploads/uiblogo.png)
+    logo_path = os.path.join(app.root_path, 'static', 'uploads', 'uiblogo.png')
+    with open(logo_path, "rb") as image_file:
+        logo_base64 = base64.b64encode(image_file.read()).decode("utf-8")
+
+    # 📄 HTML du reçu
+    html = f"""
+    <html>
+      <head>
+        <style>
+          body {{ font-family: Arial, sans-serif; padding: 20px; }}
+          .header {{ text-align: center; }}
+          .logo {{ width: 100px; }}
+          .content {{ margin-top: 30px; }}
+          .section {{ margin-bottom: 10px; }}
+          
+          .footer {{ text-align: center; margin-top: 50px; font-size: 12px; color: #555; }}
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img class="logo" src="data:image/png;base64,{logo_base64}" />
+          <h2 style="color: #e53935;">Reçu de Paiement - DonByUIB</h2>
+        </div>
+
+        <div class="content">
+          <div class="section"><strong>Nom du Donateur :</strong> {user.nom_complet}</div>
+          <div class="section"><strong>Email :</strong> {user.email}</div>
+          <div class="section"><strong>Campagne :</strong> {don.titre}</div>
+          <div class="section"><strong>Montant :</strong> {participation.montant} TND</div>
+          <div class="section"><strong>Date :</strong> {participation.date_participation.strftime('%d/%m/%Y')}</div>
+        </div>
+
+   
+
+
+        <div class="footer">
+          Ce reçu est généré automatiquement par DonByUIB.<br>
+          Merci pour votre soutien et votre générosité.
+        </div>
+      </body>
+    </html>
+    """
+
+    # Génération PDF
+    buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(BytesIO(html.encode('utf-8')), dest=buffer)
+    if pisa_status.err:
+        return jsonify({"error": "Erreur lors de la génération du PDF"}), 500
+
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=recu_{id_participation}.pdf'
+    return response
+
 
 
 # ------------------- DATABASE MIGRATION -------------------

@@ -1,0 +1,70 @@
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  
+
+
+/* ✅ Stylise les badges de statut */
+.badge {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 12px;
+    text-transform: capitalize;
+    font-weight: 500;
+    &.bg-warning {
+      background-color: #fbc02d;
+      color: #000;
+    }
+    &.bg-success {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    &.bg-danger {
+      background-color: #f44336;
+      color: #fff;
+    }
+  }
+  
+  /* ✅ Stylise les boutons d'action */
+  .td-actions {
+    button {
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      margin-left: 3px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      i {
+        font-size: 18px;
+      }
+    }
+  
+    .btn-success {
+      background-color: #4caf50;
+      color: white;
+      &:hover {
+        background-color: darken(#4caf50, 10%);
+      }
+    }
+  
+    .btn-danger {
+      background-color: #f44336;
+      color: white;
+      &:hover {
+        background-color: darken(#f44336, 10%);
+      }
+    }
+  }
+  
+  /* ✅ Table responsive styling (si besoin) */
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  
+  

@@ -31,6 +31,12 @@ import { SuccessComponent } from './front/success/success.component';
 import { FailComponent } from './front/fail/fail.component';
 import { ModifierprofilComponent } from './donator/modifierprofil/modifierprofil.component';
 import { BodyDonatorComponent } from './donator/body-donator/body-donator.component';
+import { ValiderRefuserDonComponent } from './admin/valider-refuser-don/valider-refuser-don.component';
+import { ModifierDonComponent } from './components/modifier-don/modifier-don.component';
+import { ModifierCompteAssociationComponent } from './admin/modifier-compte-association/modifier-compte-association.component';
+import { ValiderRefuserPublicationComponent } from './admin/valider-refuser-publication/valider-refuser-publication.component';
+import { MesPaiementsComponent } from './donator/mes-paiements/mes-paiements.component';
+import { AssociationDetailComponent } from './front/association-detail/association-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'client', pathMatch: 'full' },
@@ -50,6 +56,9 @@ export const routes: Routes = [
       { path: '', redirectTo: 'stat', pathMatch: 'full' },  // ✅ Default route when visiting /dashboard
       { path: 'stat', component: DashboardComponent },      // ✅ Show statistics on /dashboard
       { path: 'gestion-associations', component: GestionUsersComponent },
+      { path: 'admin-valider-don', component: ValiderRefuserDonComponent },
+      { path: 'admin-valider-publication', component: ValiderRefuserPublicationComponent },
+      { path: 'modifier-compte-association/:id', component: ModifierCompteAssociationComponent },
       
     ]
   },
@@ -69,6 +78,7 @@ export const routes: Routes = [
       { path: 'table-list', component: TableListComponent },
       {path: 'table-publication', component: ListPublicationComponent},
       { path: 'modifier-publication/:id', component: ModifierPublicationComponent },
+      {path: 'modifier-don/:id',component:ModifierDonComponent}
     ]
   },
 
@@ -83,7 +93,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'welcome-donator', pathMatch: 'full' },
       {path:'welcome-donator',component:BodyDonatorComponent},
       {path:'modifier-profil', component: ModifierprofilComponent},
-     
+      {path:'mes-paiements', component: MesPaiementsComponent,canActivate: [AuthGuard]},
     ]
   },
 
@@ -118,6 +128,13 @@ export const routes: Routes = [
       path: 'fail',
       component: FailComponent
       },
+
+     {
+      path: 'detail-association/:id',
+      component: AssociationDetailComponent
+      },
+
+
 
   
   

@@ -1,0 +1,13 @@
+<div class="association-card" *ngIf="association">
+  <img class="banner" [src]="'http://localhost:5000' + association.photo" alt="Photo Association">
+
+  <div class="content">
+    <h2>{{ association.nom_complet }}</h2>
+    <p class="description">{{ association.description_association }}</p>
+
+    <div class="info">
+      <p><mat-icon color="warn">call</mat-icon> {{ association.telephone }}</p>
+      <p><mat-icon color="warn">place</mat-icon> {{ association.adresse }}</p>
+    </div>
+  </div>
+</div>

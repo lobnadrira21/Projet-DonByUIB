@@ -23,28 +23,64 @@
           <mat-label>Nom complet *</mat-label>
           <mat-icon matPrefix>person</mat-icon>
           <input matInput [(ngModel)]="nom_complet" required />
+        
         </mat-form-field>
+         <div *ngIf="!isValidNomComplet() && nom_complet.length > 0" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+  <strong>Erreur :</strong> Le nom complet ne doit contenir que des lettres (pas de chiffres ni de caractères spéciaux).
+  <button type="button" class="close" aria-label="Close" (click)="nom_complet = ''">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+
 
         <!-- Email -->
         <mat-form-field appearance="outline">
           <mat-label>Email *</mat-label>
           <mat-icon matPrefix>email</mat-icon>
           <input matInput type="email" [(ngModel)]="email" required />
+
         </mat-form-field>
+       <div *ngIf="!isValidEmail() && email.length > 0" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+  <strong>Erreur :</strong> Format d'adresse email invalide.
+  <button type="button" class="close" aria-label="Close" (click)="email = ''">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
 
         <!-- Téléphone -->
         <mat-form-field appearance="outline">
           <mat-label>Téléphone *</mat-label>
           <mat-icon matPrefix>phone</mat-icon>
-          <input matInput type="text" [(ngModel)]="telephone" required />
+          <input matInput type="text" [(ngModel)]="telephone" required (input)="hideTelError = false" />
+
+          
         </mat-form-field>
+       <div *ngIf="!isValidTelephone() && telephone.length > 0" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+  <strong>Erreur :</strong> Le numéro doit comporter exactement 8 chiffres.
+  <button type="button" class="close" aria-label="Close" (click)="hideTelError = true">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
 
         <!-- Password -->
         <mat-form-field appearance="outline">
           <mat-label>Mot de passe *</mat-label>
           <mat-icon matPrefix>lock</mat-icon>
-          <input matInput type="password" [(ngModel)]="password" required />
+          <input matInput type="password" [(ngModel)]="password" required (input)="hidePwdError = false" />
+
+        
         </mat-form-field>
+  <div *ngIf="!isStrongPassword() && password.length > 0 && !hidePwdError"
+     class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+  <strong>Erreur :</strong> Le mot de passe doit contenir au moins :
+  une lettre majuscule, un chiffre et un caractère spécial.
+  <button type="button" class="close" aria-label="Close" (click)="hidePwdError = true">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
 
         <!-- Confirm Password -->
         <mat-form-field appearance="outline">

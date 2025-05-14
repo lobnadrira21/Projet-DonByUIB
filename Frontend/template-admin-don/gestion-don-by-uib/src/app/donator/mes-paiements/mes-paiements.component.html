@@ -1,0 +1,23 @@
+<div class="row" style="margin-top: 2%;margin-left: 2%;">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let paiement of paiements">
+      <div class="card shadow rounded">
+        <div class="card-header bg-danger text-white text-center py-2">
+          <h5 class="mb-0">{{ paiement.titre_don }}</h5>
+        </div>
+  
+        <div class="card-body">
+          <p><strong>Montant :</strong> {{ paiement.montant }} TND</p>
+          <p><strong>Date :</strong> {{ paiement.date | date: 'mediumDate' }}</p>
+        </div>
+        <div class="card-footer text-end bg-transparent border-0">
+            <button class="btn btn-danger btn-sm w-100" (click)="generateRecu(paiement)">
+                <i class="material-icons">receipt</i> Voir reçu
+              </button>
+              
+         
+              
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -13,6 +13,7 @@ import { NotificationsComponent } from '../../notifications/notifications.compon
 import { UpgradeComponent } from '../../upgrade/upgrade.component';
 import { GestionUsersComponent } from 'app/admin/gestion-users/gestion-users.component';
 import { AjoutAssociationComponent } from 'app/admin/ajout-association/ajout-association.component';
+import { ValiderRefuserDonComponent } from 'app/admin/valider-refuser-don/valider-refuser-don.component';
 const routes: Routes = [
     {
       path: 'dashboard',
@@ -21,6 +22,7 @@ const routes: Routes = [
         { path: '', component: DashboardComponent },
           { path: 'stat', component: DashboardComponent },      // ✅ Statistics page
           { path: 'gestion-associations', component: GestionUsersComponent },
+          { path: 'admin-valider-don', component: ValiderRefuserDonComponent },
          
       ]
   }

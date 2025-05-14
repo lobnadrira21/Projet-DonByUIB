@@ -1,25 +1,34 @@
 <div *ngIf="publication">
-    <h2>{{ publication.titre }}</h2>
-    <p class="content">{{ publication.contenu }}</p>
-    <p><strong>Date :</strong> {{ publication.date_publication | date }}</p>
-    <p><strong>Likes :</strong> {{ publication.nb_likes }}</p>
-    <p><strong>Commentaires :</strong> {{ publication.nb_commentaires }}</p>
+  <h2>{{ publication.titre }}</h2>
+  <p class="content">{{ publication.contenu }}</p>
+  <p><strong>Date :</strong> {{ publication.date_publication | date }}</p>
+  <p><strong>Likes :</strong> {{ publication.nb_likes }}</p>
+  <p><strong>Commentaires :</strong> {{ publication.nb_commentaires }}</p>
 
-  
-    <h3>Commentaires</h3>
-    <div *ngIf="publication.commentaires.length > 0; else noComments">
-      <ul>
-        <li *ngFor="let c of publication.commentaires">
-          🗨️ {{ c.contenu }} ({{ c.date_commentaire | date }})
-        </li>
-      </ul>
-    </div>
-    <ng-template #noComments>
-      <p>Aucun commentaire pour le moment.</p>
-    </ng-template>
+  <h3>Commentaires</h3>
+  <div *ngIf="publication.commentaires.length > 0; else noComments">
+    <ul>
+      <li *ngFor="let c of publication.commentaires">
+        🗨️ {{ c.contenu }} ({{ c.date_commentaire | date }})
+        <span 
+          class="badge"
+          [ngClass]="{
+            'badge-success': c.sentiment === 'positif',
+            'badge-warning': c.sentiment === 'neutre',
+            'badge-danger': c.sentiment === 'négatif'
+          }"
+        >
+          {{ c.sentiment }}
+        </span>
+      </li>
+    </ul>
   </div>
-  
-  <div *ngIf="error" class="error">{{ error }}</div>
-  
-  <button mat-stroked-button color="primary" (click)="close()">Fermer</button>
-  
+
+  <ng-template #noComments>
+    <p>Aucun commentaire pour le moment.</p>
+  </ng-template>
+</div>
+
+<div *ngIf="error" class="error">{{ error }}</div>
+
+<button mat-stroked-button color="primary" (click)="close()">Fermer</button>

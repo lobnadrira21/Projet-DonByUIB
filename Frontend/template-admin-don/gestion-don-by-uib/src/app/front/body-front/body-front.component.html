@@ -6,8 +6,9 @@
       pour promouvoir la solidarité et l'engagement associatif.
     </p>
     <div class="btn-group">
-      <button class="btn-primary">Effectuer un don</button>
+      
       <button class="btn-secondary" (click)="scrollToCatalog()">Consulter tous les dons </button>
+      <button class="btn-primary"  (click)="scrollToPublications()" >Voir les publications</button>
     </div>
   </div>
 
@@ -37,9 +38,24 @@
 <section class="don-cards" id="catalog">
  
   <div class="card-container" *ngFor="let don of dons">
-   
-    <div class="card">
-      <img [src]="'http://localhost:5000' + don.photo_don" alt="Photo Don" class="card-img-top" />
+  <div class="card">
+
+    <!-- Wrapper de l'image avec overlay -->
+    <div class="image-overlay-wrapper">
+      <img
+        [src]="'http://localhost:5000' + don.photo_don"
+        alt="Photo Don"
+        class="card-img-top"
+      />
+
+      <!-- ✅ Overlay + bouton affiché au survol -->
+      <div class="overlay">
+        <a [routerLink]="['/detail-association', don.id_association]" class="overlay-btn">
+          Consulter l'association
+        </a>
+      </div>
+    </div>
+
 
       <span class="badge bg-secondary">Autre</span>
       <h4 class="card-title text-center mt-2">{{ don.titre }}</h4>

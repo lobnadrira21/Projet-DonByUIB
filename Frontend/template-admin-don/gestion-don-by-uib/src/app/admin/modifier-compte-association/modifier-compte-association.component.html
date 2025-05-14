@@ -1,0 +1,33 @@
+<h2   style="margin-top: 3%;" class="page-title">Modifier l'association</h2>
+
+<form (ngSubmit)="onUpdate()" class="association-form">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Nom complet</mat-label>
+    <input matInput [(ngModel)]="association.nom_complet" name="nom_complet" required>
+  </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+        <mat-label>email</mat-label>
+        <input matInput [(ngModel)]="association.email" name="email" required>
+      </mat-form-field>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Description association
+    </mat-label>
+    <textarea matInput [(ngModel)]="association.description_association" name="description_association" rows="6" required></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>telephone</mat-label>
+    <input matInput [(ngModel)]="association.telephone" name="telephone" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>adresse</mat-label>
+    <input matInput [(ngModel)]="association.adresse" name="adresse" required>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>type association</mat-label>
+    <input matInput [(ngModel)]="association.type_association" name="type_association" required>
+  </mat-form-field>
+  <button mat-raised-button color="warn" class="btn-enregistrer" type="submit">Enregistrer</button>
+</form>

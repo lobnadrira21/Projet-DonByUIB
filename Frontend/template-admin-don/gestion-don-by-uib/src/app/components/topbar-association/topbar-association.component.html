@@ -29,26 +29,23 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="javascript:void(0)" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="material-icons">notifications</i>
-                      <span class="notification" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
-                      <p>
-                        <span class="d-lg-none d-md-block">Notifications</span>
-                      </p>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                      <ng-container *ngIf="notifications.length > 0; else noNotif">
-                        <a class="dropdown-item" *ngFor="let notif of notifications" [routerLink]="['/dashboard-association/table-publication']">
-                            {{ notif.contenu }}
-                          </a>
-                          
-                      </ng-container>
-                      <ng-template #noNotif>
-                        <a class="dropdown-item text-muted">Aucune nouvelle notification</a>
-                      </ng-template>
-                    </div>
-                  </li>
+                  <!-- 🔔 Notifications -->
+        <li class="nav-item dropdown">
+            <a class="nav-link" href="javascript:void(0)" id="notifDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="material-icons">notifications</i>
+              <span class="notification" *ngIf="notifications.length > 0">{{ notifications.length }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notifDropdown">
+              <ng-container *ngIf="notifications.length > 0; else noNotif">
+                <a class="dropdown-item" *ngFor="let notif of notifications" [routerLink]="['/dashboard-association/table-publication']">
+                  {{ notif.contenu }}
+                </a>
+              </ng-container>
+              <ng-template #noNotif>
+                <a class="dropdown-item text-muted">Aucune nouvelle notification</a>
+              </ng-template>
+            </div>
+          </li>
                   
                 <li class="nav-item d-flex align-items-center mr-3">
                     <span class="font-weight-bold text-dark" style="font-size: 16px;">

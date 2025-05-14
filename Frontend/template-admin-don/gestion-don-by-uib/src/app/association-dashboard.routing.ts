@@ -6,6 +6,7 @@ import { TableListComponent } from './table-list/table-list.component';
 import { BodyAssociationComponent } from './components/body-association/body-association.component';
 import { ListPublicationComponent } from './components/list-publication/list-publication.component';
 import { ModifierPublicationComponent } from './components/modifier-publication/modifier-publication.component';
+import { ModifierDonComponent } from './components/modifier-don/modifier-don.component';
 
 const routes: Routes = [
   {
@@ -25,6 +26,7 @@ const routes: Routes = [
       },
       {path: 'table-publication', component: ListPublicationComponent},
        { path: 'modifier-publication/:id', component: ModifierPublicationComponent },
+       {path: 'modifier-don/:id',component:ModifierDonComponent}
     ]
   }
 ];

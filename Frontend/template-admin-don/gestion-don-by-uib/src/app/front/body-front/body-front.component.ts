@@ -31,6 +31,11 @@ export class BodyFrontComponent implements OnInit {
   scrollToCatalog() {
     document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' });
   }
+  
+  scrollToPublications() {
+    document.getElementById('publication')?.scrollIntoView({ behavior: 'smooth' });
+  }
+  
 
   animateCard(event: Event) {
     const card = event.currentTarget as HTMLElement;

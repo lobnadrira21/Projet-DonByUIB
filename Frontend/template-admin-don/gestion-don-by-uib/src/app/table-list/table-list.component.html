@@ -18,10 +18,11 @@
             <p><strong>Montant :</strong> {{ don.objectif }} TND</p>
             <p><strong>Date fin :</strong> {{ don.date_fin_collecte | date:'mediumDate' }}</p>
             <div class="d-flex justify-content-end gap-2">
-              <button mat-raised-button color="primary" matTooltip="Modifier">
+              <button mat-raised-button color="primary" matTooltip="Modifier" [routerLink]="['/dashboard-association/modifier-don', don.id_don]">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-raised-button color="warn" matTooltip="Supprimer">
+              
+              <button mat-raised-button color="warn" matTooltip="Supprimer" (click)="deleteDon(don.id_don)"> 
                 <mat-icon>delete</mat-icon>
               </button>
             </div>

@@ -1,0 +1,92 @@
+<div class="main-content">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-12 table-container">
+          <div class="card">
+            <div class="card-header card-header-danger d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="card-title">Validation des dons</h4>
+                <p class="card-category">La table de gestion des dons en attente de validation</p>
+              </div>
+            </div>
+  
+            <div class="card-body">
+              <div class="table-responsive">
+  
+                <!-- 🟨 Filtre + compteur -->
+                <div class="d-flex justify-content-end mb-3">
+                  <label for="filterStatut" class="me-2 align-self-center">Filtrer par statut :</label>
+                  <select class="custom-select custom-select-sm w-auto" id="filterStatut" [(ngModel)]="filterStatut">
+                    <option value="">Tous</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="valide">Validé</option>
+                    <option value="refuse">Refusé</option>
+                  </select>
+  
+                  <span class="ms-3 align-self-center text-muted">
+                    ({{ getDonsFiltres().length }} dons affichés)
+                  </span>
+                </div>
+  
+                <!-- 🟩 Table -->
+                <table class="table">
+                  <thead class="text-primary">
+                    <tr>
+                      <th>#</th>
+                      <th>Titre</th>
+                      <th>Objectif</th>
+                      <th>Collecté</th>
+                      <th>Date fin</th>
+                      <th>Association</th>
+                      <th>Statut</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let don of getDonsFiltres(); let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ don.titre }}</td>
+                      <td>{{ don.objectif }} TND</td>
+                      <td>{{ don.montant_collecte }} TND</td>
+                      <td>{{ don.date_fin_collecte }}</td>
+                      <td>{{ don.association }}</td>
+                      <td>
+                        <span class="badge"
+                          [ngClass]="{
+                            'bg-warning': don.statut?.toLowerCase() === 'en_attente',
+                            'bg-success': don.statut?.toLowerCase() === 'valide',
+                            'bg-danger': don.statut?.toLowerCase() === 'refuse'
+                          }">
+                          {{ don.statut?.toLowerCase() === 'en_attente' ? 'En attente' :
+                             don.statut?.toLowerCase() === 'valide' ? 'Validé' : 'Refusé' }}
+                        </span>
+                      </td>
+                      <td class="td-actions text-right">
+                        <button class="btn btn-success btn-sm me-1"
+                                (click)="valider(don.id_don)"
+                                [disabled]="don.statut?.toLowerCase() !== 'en_attente'">
+                          <i class="material-icons">check</i>
+                        </button>
+                        <button class="btn btn-danger btn-sm"
+                                (click)="refuser(don.id_don)"
+                                [disabled]="don.statut?.toLowerCase() !== 'en_attente'">
+                          <i class="material-icons">close</i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+  
+                <!-- 🔴 Message si aucun don -->
+                <div *ngIf="getDonsFiltres().length === 0">
+                  <div class="alert alert-warning text-center">Aucun don à afficher.</div>
+                </div>
+  
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
