@@ -65,11 +65,14 @@
                                 [disabled]="pub.statut?.toLowerCase() !== 'en_attente'">
                           <i class="material-icons">check</i>
                         </button>
-                      <button class="btn btn-danger btn-sm">
-                                
-                              
-                          <i class="material-icons">close</i>
-                        </button> 
+                   <button class="btn btn-danger btn-sm"
+        (click)="refuser(pub.id_publication)"
+        [disabled]="pub?.statut?.trim().toLowerCase() !== 'en_attente'">
+  <i class="material-icons">close</i>
+</button>
+
+
+
                       </td>
                     </tr>
                   </tbody>

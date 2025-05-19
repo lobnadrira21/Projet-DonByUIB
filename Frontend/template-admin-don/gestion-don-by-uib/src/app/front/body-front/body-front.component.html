@@ -11,12 +11,35 @@
       <button class="btn-primary"  (click)="scrollToPublications()" >Voir les publications</button>
     </div>
   </div>
+<div class="content-right">
 
-  <div class="content-right">
-    <div class="phone-3d">
-      <img src="assets/img/uib-3d-app.png" alt="3D Phone with UIB App" />
-    </div>
+
+  <!-- ✅ Téléphone en 3D -->
+  <div class="phone-3d">
+    <img src="assets/img/uib-3d-don-phone.png" alt="3D Phone with UIB App" />
   </div>
+</div>
+
+
+
+
+
+
+
+</section>
+<section class="recommendations" *ngIf="recommandations.length">
+  <h3>✨ Dons recommandés pour vous</h3>
+  <div class="card-container" *ngFor="let don of recommandations">
+    <div class="card">
+      <img [src]="'http://localhost:5000' + don.photo_don" alt="don" />
+      <h4>{{ don.titre }}</h4>
+      <p>{{ don.description }}</p>
+      <p><strong>{{ don.montant_collecte }} / {{ don.objectif }} TND</strong></p>
+         <a [routerLink]="['/don', don.id_don]" class="btn-view">Voir</a>
+    </div>
+     
+  </div>
+
 </section>
 
 <!-- ✅ SEARCH BAR -->
@@ -88,16 +111,32 @@
 </section>
 
 
-<!-- Publications Section after Dons -->
-<section class="publication-feed" id="publication">
-  <div class="publication-left">
-    <h3>Les publications</h3>
-    <div *ngFor="let pub of publications" class="publication-preview" (click)="selectPublication(pub)">
-      <h4>{{ pub.titre }}</h4>
-      <p>{{ pub.date_publication | date }}</p>
-    </div>
-  </div>
 
+<!--  composant de publications avec flèches -->
+<section class="publication-carousel" id="publication">
+  <h3> 📰 Les publications</h3>
+  <div class="carousel-wrapper">
+    <button class="carousel-btn left" (click)="prevSlide()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <div class="carousel" [style.transform]="'translateX(-' + currentSlide * 100 + '%)'" #carouselContainer>
+      <ng-container *ngFor="let pub of publications">
+        <div class="carousel-card" (click)="selectPublication(pub)">
+          <h4>{{ pub.titre }}</h4>
+          <p>{{ pub.date_publication | date }}</p>
+          <p class="pub-extrait">{{ pub.contenu | slice:0:100 }}...</p>
+        </div>
+      </ng-container>
+    </div>
+
+    <button class="carousel-btn right" (click)="nextSlide()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</section>
+
+<section>
   <div class="publication-right" *ngIf="selectedPublication">
     <div class="post-card">
       <div class="post-header">
@@ -120,15 +159,14 @@
         <button (click)="likeSelectedPublication()">
           <mat-icon>favorite</mat-icon> J’aime ({{ selectedPublication.nb_likes }})
         </button>
-        
         <button><mat-icon>comment</mat-icon> Commenter</button>
-        <!-- <button><mat-icon>share</mat-icon> Partager</button> -->
       </div>
 
       <div class="comments-section">
         <div *ngFor="let com of selectedPublication.commentaires" class="comment">
           <strong>{{ com.nom }}</strong> : {{ com.contenu }}
         </div>
+
         <div class="comment-input">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Ajouter un commentaire</mat-label>

@@ -1007,7 +1007,33 @@ def valider_publication(id_publication):
     db.session.commit()
     return jsonify({"message": "Publication validé avec succès"}), 200
 
-# get all publications (admin)
+
+@app.route("/publication/<int:id_publication>/refuser", methods=["PUT"])
+@jwt_required()
+def refuser_publication(id_publication):
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    publication = Publication.query.get(id_publication)
+    if not publication:
+        return jsonify({"error": "Publication introuvable"}), 404
+
+    publication.statut = "refuse"
+
+    notif = Notification(
+        contenu=f"La publication '{publication.titre}' a été refusée par l’administrateur.",
+        id_publication=publication.id_publication,
+        id_association=publication.id_association,  # ✅ ceci est nécessaire
+        date=datetime.utcnow(),
+        is_read=False  # si ce champ existe
+    )
+    db.session.add(notif)
+    db.session.commit()
+
+    return jsonify({"message": "Publication refusée avec succès"}), 200
+
+# afficher les publications par l'admin 
 
 @app.route("/admin/publications", methods=["GET"])
 @jwt_required()
@@ -1024,12 +1050,10 @@ def get_all_publication_admin():
             "titre": publication.titre,
             "contenu": publication.contenu,
             "date_publication": publication.date_publication.isoformat(),
-            "statut":publication.statut,
+            "statut": publication.statut
         })
 
     return jsonify(result), 200
-
-
 
 
 # get dons by associations
@@ -1749,6 +1773,64 @@ def generate_recu_pdf(id_participation):
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=recu_{id_participation}.pdf'
     return response
+
+# Moteur de recommendation pour extraire les dons selon préférences du donateur
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+@app.route("/recommandations", methods=["GET"])
+@jwt_required()
+def recommander_dons():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if user.role != "donator":
+        return jsonify({"error": "Seuls les donateurs peuvent recevoir des recommandations"}), 403
+
+    participations = Participation.query.filter_by(id_user=user_id).all()
+    if not participations:
+        return jsonify({"message": "Aucune participation, recommander les dons populaires"}), 200
+
+    # Récupérer les dons auxquels il a participé
+    dons_ids = [p.id_don for p in participations]
+    user_dons = Don.query.filter(Don.id_don.in_(dons_ids)).all()
+
+    # Construire le corpus (titre + description)
+    user_texts = [d.titre + " " + (d.description or "") for d in user_dons]
+    user_text = " ".join(user_texts)
+
+    # Tous les autres dons valides
+    all_dons = Don.query.filter(Don.statut == "valide").all()
+    all_texts = [don.titre + " " + (don.description or "") for don in all_dons]
+
+    # TF-IDF + similarité cosinus
+    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidf.fit_transform([user_text] + all_texts)
+    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+
+    # Associer similarités avec les dons
+    dons_scores = [
+        {"don": don, "score": score}
+        for don, score in zip(all_dons, cosine_similarities)
+        if don.id_don not in dons_ids  # Ne pas recommander les dons déjà soutenus
+    ]
+    dons_scores.sort(key=lambda x: x["score"], reverse=True)
+
+    recommandations = [
+        {
+            "id_don": d["don"].id_don,
+            "titre": d["don"].titre,
+            "description": d["don"].description,
+            "photo_don": d["don"].photo_don,
+            "montant_collecte": d["don"].montant_collecte,
+            "objectif": d["don"].objectif,
+            "score": round(d["score"], 2)
+        }
+        for d in dons_scores[:5]  # Recommander les 5 meilleurs
+    ]
+
+    return jsonify(recommandations), 200
+
 
 
 

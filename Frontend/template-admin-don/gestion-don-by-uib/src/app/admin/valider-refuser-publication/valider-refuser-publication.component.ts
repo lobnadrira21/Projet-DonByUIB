@@ -55,6 +55,18 @@ export class ValiderRefuserPublicationComponent implements OnInit {
         }
       });
     }
+
+    refuser(id: number) {
+    this.authService.refuserPublication(id).subscribe({
+      next: () => {
+        this.snackBar.open('❌ Publication refusée avec succès', 'Fermer', { duration: 3000 });
+        this.loadPublications();
+      },
+      error: () => {
+        this.snackBar.open('⚠️ Erreur lors du refus', 'Fermer', { duration: 3000 });
+      }
+    });
+  }
   
   
     

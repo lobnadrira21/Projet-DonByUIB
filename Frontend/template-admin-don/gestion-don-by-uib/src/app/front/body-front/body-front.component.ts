@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
@@ -23,6 +23,7 @@ export class BodyFrontComponent implements OnInit {
   selectedPublication: any = null;
   newComment: string = '';
   donParticipants: { [key: number]: number } = {};
+  recommandations: any[] = [];
 
 
   constructor(private authService: AuthService) {}
@@ -36,6 +37,34 @@ export class BodyFrontComponent implements OnInit {
     document.getElementById('publication')?.scrollIntoView({ behavior: 'smooth' });
   }
   
+@ViewChild('carousel', { static: false }) carousel!: ElementRef;
+
+scrollLeft() {
+  this.carousel.nativeElement.scrollBy({ left: -350, behavior: 'smooth' });
+}
+
+scrollRight() {
+  this.carousel.nativeElement.scrollBy({ left: 350, behavior: 'smooth' });
+}
+
+currentSlide = 0;
+
+get totalSlides(): number {
+  return Math.ceil(this.publications.length / 4);
+}
+
+prevSlide() {
+  if (this.currentSlide > 0) {
+    this.currentSlide--;
+  }
+}
+
+nextSlide() {
+  if (this.currentSlide < this.totalSlides - 1) {
+    this.currentSlide++;
+  }
+}
+
 
   animateCard(event: Event) {
     const card = event.currentTarget as HTMLElement;
@@ -55,6 +84,11 @@ export class BodyFrontComponent implements OnInit {
         console.error('Erreur lors du chargement des publications :', err);
       }
     });
+    // afficher les dons recommandés
+     this.authService.getRecommandations().subscribe({
+    next: (data) => this.recommandations = data,
+    error: (err) => console.error(err)
+  });
   }
 
   refreshDonsAndParticipants() {
@@ -137,7 +171,10 @@ export class BodyFrontComponent implements OnInit {
     });
   }
 
-  
+
+
+
+
   
   
 

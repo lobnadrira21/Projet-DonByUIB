@@ -317,6 +317,15 @@ validerPublication(id: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/publication/${id}/valider`, {}, { headers });
 }
 
+refuserPublication(id: number): Observable<any> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.put(`${this.apiUrl}/publication/${id}/refuser`, {}, { headers });
+}
+
 getAllPublicationAdmin(): Observable<any[]> {
   const token = this.getToken(); 
   const headers = new HttpHeaders({
@@ -345,5 +354,16 @@ getRecuPaiement(id_participation: number): Observable<Blob> {
     responseType: 'blob'  // Pour recevoir un fichier PDF
   });
 }
+
+getRecommandations(): Observable<any[]> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+
+  return this.http.get<any[]>(`${this.apiUrl}/recommandations`, { headers });
+}
+
+
 
 }
