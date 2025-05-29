@@ -27,20 +27,7 @@
 
 
 </section>
-<section class="recommendations" *ngIf="recommandations.length">
-  <h3>✨ Dons recommandés pour vous</h3>
-  <div class="card-container" *ngFor="let don of recommandations">
-    <div class="card">
-      <img [src]="'http://localhost:5000' + don.photo_don" alt="don" />
-      <h4>{{ don.titre }}</h4>
-      <p>{{ don.description }}</p>
-      <p><strong>{{ don.montant_collecte }} / {{ don.objectif }} TND</strong></p>
-         <a [routerLink]="['/don', don.id_don]" class="btn-view">Voir</a>
-    </div>
-     
-  </div>
 
-</section>
 
 <!-- ✅ SEARCH BAR -->
 <section class="search-section">

@@ -37,6 +37,7 @@ import { ModifierCompteAssociationComponent } from './admin/modifier-compte-asso
 import { ValiderRefuserPublicationComponent } from './admin/valider-refuser-publication/valider-refuser-publication.component';
 import { MesPaiementsComponent } from './donator/mes-paiements/mes-paiements.component';
 import { AssociationDetailComponent } from './front/association-detail/association-detail.component';
+import { HistoriqueDonatorComponent } from './donator/historique-donator/historique-donator.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'client', pathMatch: 'full' },
@@ -94,6 +95,7 @@ export const routes: Routes = [
       {path:'welcome-donator',component:BodyDonatorComponent},
       {path:'modifier-profil', component: ModifierprofilComponent},
       {path:'mes-paiements', component: MesPaiementsComponent,canActivate: [AuthGuard]},
+      {path: 'historique', component: HistoriqueDonatorComponent }
     ]
   },
 

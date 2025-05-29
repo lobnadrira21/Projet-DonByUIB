@@ -1,13 +1,13 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'app/services/auth.service';
-import {Location, LocationStrategy, PathLocationStrategy} from '@angular/common';
+import {CommonModule, Location, LocationStrategy, PathLocationStrategy} from '@angular/common';
 import { ROUTES } from '../sidebar-donator/sidebar-donator.component';
 
 @Component({
   selector: 'app-header-donator',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule,CommonModule],
   templateUrl: './header-donator.component.html',
   styleUrl: './header-donator.component.scss'
 })
@@ -19,6 +19,8 @@ export class HeaderDonatorComponent implements OnInit {
   private sidebarVisible: boolean;
   username: string | null = ''; 
   donateurName: string = '';
+  notifications: any[] = [];
+  nbNotifications: number = 0;
 
   constructor(location: Location,  private element: ElementRef, private router: Router,private authService: AuthService) {
     this.location = location;
@@ -41,6 +43,11 @@ export class HeaderDonatorComponent implements OnInit {
   if (user && user.username) {
     this.donateurName = user.username;
   }
+  this.authService.getDonatorNotifications().subscribe((data) => {
+  this.notifications = data;
+  this.nbNotifications = data.length;
+});
+
   }
 
   sidebarOpen() {

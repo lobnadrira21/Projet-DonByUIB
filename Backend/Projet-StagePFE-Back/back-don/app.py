@@ -21,10 +21,11 @@ from datetime import datetime
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {
-    "origins": ["http://localhost:4200"],
+    "origins": ["http://localhost:4200", "http://localhost:8100"],
     "allow_headers": ["Content-Type", "Authorization"],
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }})
+
 
 
 # Database Configuration and token
@@ -201,19 +202,27 @@ class Notification(db.Model):
 
     id_association = db.Column(db.Integer, db.ForeignKey("associations.id_association", ondelete="CASCADE"), nullable=False)
     id_publication = db.Column(db.Integer, db.ForeignKey("publications.id_publication", ondelete="CASCADE"), nullable=True)
+    id_don = db.Column(db.Integer, db.ForeignKey("dons.id_don", ondelete="CASCADE"), nullable=True)  # ✅ AJOUTÉ ICI
+
     association = db.relationship("Association", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))
     publication = db.relationship("Publication", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))
+    don = db.relationship("Don", backref=db.backref("notifications", lazy=True, cascade="all, delete-orphan"))  # ✅ AJOUTÉ ICI
 
+    id_user = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    user = db.relationship("User", backref="notifications")
 
 # ---------- Methods ---------
 @app.before_request
+
 def handle_options_request():
-    if request.method == "OPTIONS":  # Handle preflight requests
+    if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight request successful"})
-        response.headers.add("Access-Control-Allow-Origin", "http://localhost:4200")
+        origin = request.headers.get("Origin", "*")
+        response.headers.add("Access-Control-Allow-Origin", origin)
         response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
         response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         return response, 200
+
 
 
 
@@ -884,29 +893,31 @@ def valider_don(id_don):
         return jsonify({"error": "Don introuvable"}), 404
 
     don.statut = "valide"
-
+    id_assoc = don.id_association
     # ✅ Notification
-    notif = Notification(
-        contenu=f"Le don '{don.titre}' a été validé par l’administrateur.",
-        id_association=don.id_association,
-        date=datetime.utcnow()
-    )
-    db.session.add(notif)
-
-    # ✅ Email (optionnel)
-    try:
-        assoc = don.association
-        if assoc and assoc.email:
-            msg = Message(
-    subject="Validation de votre don",
-    sender=app.config.get("MAIL_DEFAULT_SENDER", "admin@donbyuib.tn"),
-    recipients=[assoc.email],
-    body=f"Bonjour {assoc.nom_complet},\n\nVotre don intitulé '{don.titre}' a été validé par l'administrateur.\n\nMerci."
+    notif_assoc = Notification(
+    contenu=f"Le don '{don.titre}' a été validé par l’administrateur.",
+    id_association=id_assoc,
+    is_read=False,
+    id_don=don.id_don,
+    date=datetime.utcnow()
 )
 
-            mail.send(msg)
-    except Exception as e:
-        print("Erreur lors de l’envoi de l’email :", e)
+    db.session.add(notif_assoc)
+    # 🔔 Notifier tous les donateurs
+    utilisateurs = User.query.filter_by(role='donator').all()
+    for user in utilisateurs:
+        notif = Notification(
+            contenu=f"Nouveau don : {don.titre}",
+            date=datetime.utcnow(),
+            is_read=False,
+            id_association=id_assoc,  
+            id_user=user.id,
+            id_don=don.id_don 
+        )
+        db.session.add(notif)
+
+  
 
     db.session.commit()
     return jsonify({"message": "Don validé avec succès"}), 200
@@ -993,16 +1004,29 @@ def valider_publication(id_publication):
         return jsonify({"error": "publication introuvable"}), 404
 
     publication.statut = "valide"
-
+    id_assoc = publication.id_association
     # ✅ Notification
-    notif = Notification(
+    notif_assoc = Notification(
         contenu=f"La publication '{publication.titre}' a été validée par l’administrateur.",
-        id_publication=publication.id_publication,
-        id_association=publication.id_association,
-        date=datetime.utcnow()
+        date=datetime.utcnow(),
+        is_read=False,
+        id_association=id_assoc,
+        id_publication=publication.id_publication
     )
-    db.session.add(notif)
-
+    db.session.add(notif_assoc)
+    # 🔔 Notifier tous les donateurs
+    utilisateurs = User.query.filter_by(role='donator').all()
+    for user in utilisateurs:
+        notif = Notification(
+            contenu=f"Nouvelle publication : {publication.titre}",
+            date=datetime.utcnow(),
+            is_read=False,
+            id_association=id_assoc,  # ✅ On met ici la bonne valeur
+            id_user=user.id,
+            id_publication=publication.id_publication # (facultatif si tu veux rattacher la notif à la publication)
+        )
+        db.session.add(notif)
+    
 
     db.session.commit()
     return jsonify({"message": "Publication validé avec succès"}), 200
@@ -1530,8 +1554,27 @@ def get_notifications():
         for n in notifs
     ])
 
+#notification donateur
 
+@app.route("/notifications-donator", methods=["GET"])
+@jwt_required()
+def get_notifications_donator():
+    claims = get_jwt()
+    if claims.get("role") != "donator":
+        return jsonify({"error": "Access denied!"}), 403
 
+    current_user_id = get_jwt_identity()
+
+    notifs = Notification.query.filter_by(id_user=current_user_id).order_by(Notification.date.desc()).all()
+    return jsonify([
+        {
+            "id": n.id,
+            "contenu": n.contenu,
+            "date": n.date.isoformat(),
+            "is_read": n.is_read
+        }
+        for n in notifs
+    ])
 
 
 
@@ -1774,6 +1817,46 @@ def generate_recu_pdf(id_participation):
     response.headers['Content-Disposition'] = f'inline; filename=recu_{id_participation}.pdf'
     return response
 
+# historique du donateur 
+
+@app.route("/historique-donateur", methods=["GET"])
+@jwt_required()
+def get_historique_donateur():
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "donator":
+            return jsonify({"error": "Accès refusé"}), 403
+
+        current_user_id = get_jwt_identity()
+
+        # Récupérer participations
+        participations = Participation.query.filter_by(id_user=current_user_id).join(Don).all()
+        dons = [{
+            "type": "don",
+            "titre_don": p.don.titre,
+            "montant": p.montant,
+            "date": p.date_participation.isoformat(),
+            "photo_don": p.don.photo_don
+        } for p in participations]
+
+        # Récupérer commentaires
+        commentaires = Commentaire.query.filter_by(id_user=current_user_id).join(Publication).all()
+        comments = [{
+            "type": "commentaire",
+            "publication": c.publication.titre,
+            "contenu": c.contenu,
+            "date": c.date_commentaire.isoformat(),
+            "sentiment": c.sentiment
+        } for c in commentaires]
+
+        historique = sorted(dons + comments, key=lambda x: x['date'], reverse=True)
+
+        return jsonify(historique), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+""" 
 # Moteur de recommendation pour extraire les dons selon préférences du donateur
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -1829,7 +1912,7 @@ def recommander_dons():
         for d in dons_scores[:5]  # Recommander les 5 meilleurs
     ]
 
-    return jsonify(recommandations), 200
+    return jsonify(recommandations), 200 """
 
 
 

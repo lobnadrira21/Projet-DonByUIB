@@ -23,7 +23,7 @@ export class BodyFrontComponent implements OnInit {
   selectedPublication: any = null;
   newComment: string = '';
   donParticipants: { [key: number]: number } = {};
-  recommandations: any[] = [];
+ 
 
 
   constructor(private authService: AuthService) {}
@@ -84,11 +84,7 @@ nextSlide() {
         console.error('Erreur lors du chargement des publications :', err);
       }
     });
-    // afficher les dons recommandés
-     this.authService.getRecommandations().subscribe({
-    next: (data) => this.recommandations = data,
-    error: (err) => console.error(err)
-  });
+   
   }
 
   refreshDonsAndParticipants() {

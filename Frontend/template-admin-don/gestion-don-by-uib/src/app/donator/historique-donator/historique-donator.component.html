@@ -1,0 +1,20 @@
+<div class="container">
+    
+  <h3 style="margin-top: 5%;">🕘 Historique de mes actions</h3>
+  <div *ngFor="let item of historique" class="card my-3 p-3">
+    <div *ngIf="item.type === 'don'">
+      <h5>💰 Don effectué</h5>
+      <p><strong>Campagne :</strong> {{item.titre_don}}</p>
+      <p><strong>Montant :</strong> {{item.montant}} TND</p>
+      <p><strong>Date :</strong> {{item.date | date}}</p>
+      
+    </div>
+
+    <div *ngIf="item.type === 'commentaire'">
+      <h5>💬 Commentaire laissé</h5>
+      <p><strong>Publication :</strong> {{item.publication}}</p>
+      <p><strong>Contenu :</strong> {{item.contenu}}</p>
+      <p><strong>Date :</strong> {{item.date | date}}</p>
+    </div>
+  </div>
+</div>
