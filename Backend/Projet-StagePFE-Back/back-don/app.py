@@ -16,6 +16,7 @@ from flask_mail import Mail, Message
 from flask import url_for
 from flask import send_from_directory
 from datetime import datetime
+from datetime import date
 
 
 app = Flask(__name__)
@@ -119,6 +120,11 @@ class Don(db.Model):
     recu_don = db.Column(db.String(255), nullable=True)
     photo_don = db.Column(db.String(255), nullable=True)
     statut = db.Column(db.String(20), default="en_attente")  # "en_attente", "valide", "refuse"
+
+     #  Attributs utiles pour les statistiques :
+    nb_donateurs = db.Column(db.Integer, default=0)
+    is_reussi = db.Column(db.Boolean, default=False)
+    
 
     # clé etrangere avec cascade
     id_association = db.Column(
@@ -1119,10 +1125,13 @@ def get_all_dons_public():
     try:
         # ❗ Exclure les dons refusés et en attente
         dons = Don.query.filter(Don.statut == "valide").all()
-
+        today = date.today()
         result = []
+        
+
         for don in dons:
-            result.append({
+              pourcentage = round((don.montant_collecte / don.objectif) * 100) if don.objectif > 0 else 0
+              result.append({
                 "id_don": don.id_don,
                 "titre": don.titre,
                 "description": don.description,
@@ -1131,7 +1140,10 @@ def get_all_dons_public():
                 "date_fin_collecte": don.date_fin_collecte.isoformat(),
                 "photo_don": don.photo_don,
                 "nom_organisateur": don.association.nom_complet if don.association else "Inconnu",
-                "id_association": don.id_association
+                "id_association": don.id_association,
+                "pourcentage": pourcentage,
+                "is_expire": don.date_fin_collecte < today
+
             })
 
         return jsonify(result), 200
@@ -1217,6 +1229,12 @@ def participate(id_don):
 
         db.session.add(participation)
         don.montant_collecte += float(montant)
+        nb_unique_users = db.session.query(Participation.id_user).filter_by(id_don=id_don).distinct().count()
+        don.nb_donateurs = nb_unique_users
+
+# Vérifier si l’objectif est atteint
+        if don.montant_collecte >= don.objectif:
+            don.is_reussi = True
         db.session.commit()
 
         return jsonify({

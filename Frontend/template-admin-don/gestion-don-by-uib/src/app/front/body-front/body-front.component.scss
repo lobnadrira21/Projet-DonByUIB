@@ -750,6 +750,22 @@ html, body {
   }
 }
 
+.badge-expire {
+  background-color: #999;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.disabled-btn {
+  background-color: #cccccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+}
+
+
 
 
 

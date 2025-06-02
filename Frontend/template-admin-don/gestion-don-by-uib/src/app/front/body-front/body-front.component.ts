@@ -122,9 +122,7 @@ nextSlide() {
   
   
 
-  getPourcentage(montant: number, objectif: number): number {
-    return objectif > 0 ? Math.round((montant / objectif) * 100) : 0;
-  }
+  
   selectPublication(pub: any) {
     this.selectedPublication = pub;
   }
