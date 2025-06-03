@@ -47,20 +47,12 @@ app.config['MAIL_DEFAULT_SENDER'] = 'DonByUIB <admin@donbyuib.tn>'
 
 mail = Mail(app)  
 
-
-
-
-
-
-
 # Initialize Database
 db = SQLAlchemy(app)
 migrate = Migrate(app, db) 
 jwt = JWTManager(app)
 
 revoked_tokens = set()
-
-
 
 
 # ------------------- MODELS -------------------
@@ -228,12 +220,6 @@ def handle_options_request():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
         response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         return response, 200
-
-
-
-
-
-
 
 import re
 
@@ -1519,7 +1505,7 @@ def delete_publication(id):
 
 
 
-# add commentaire 
+# add commentaire en tant que donateur
 
 @app.route("/add-comment/<int:publication_id>", methods=["POST"])
 @jwt_required()
@@ -1573,7 +1559,7 @@ def add_comment(publication_id):
         return jsonify({"error": str(e)}), 500
 
     
-#get notification 
+#get notification (association)
 
 @app.route("/notifications", methods=["GET"])
 @jwt_required()
@@ -1628,7 +1614,7 @@ def get_notifications_donator():
 
 
 
-
+#paiement avec API flouci
 @app.route("/pay-flouci", methods=["POST"])
 @jwt_required()
 def pay_flouci():
@@ -1707,7 +1693,7 @@ def verify_flouci_payment(payment_id):
 
            
 
-
+# faire like à une publication
 @app.route("/like-publication/<int:publication_id>", methods=["POST"])
 @jwt_required()
 def like_publication(publication_id):
@@ -1756,7 +1742,7 @@ def get_sentiment_label(compound_score, comment):
         return "neutre"
 
 
-# get paiements
+# get paiements (donateur)
 @app.route("/mes-paiements", methods=["GET"])
 @jwt_required()
 def get_paiements_donator():
@@ -1942,67 +1928,6 @@ def get_historique_donateur():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-""" 
-# Moteur de recommendation pour extraire les dons selon préférences du donateur
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
-@app.route("/recommandations", methods=["GET"])
-@jwt_required()
-def recommander_dons():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-
-    if user.role != "donator":
-        return jsonify({"error": "Seuls les donateurs peuvent recevoir des recommandations"}), 403
-
-    participations = Participation.query.filter_by(id_user=user_id).all()
-    if not participations:
-        return jsonify({"message": "Aucune participation, recommander les dons populaires"}), 200
-
-    # Récupérer les dons auxquels il a participé
-    dons_ids = [p.id_don for p in participations]
-    user_dons = Don.query.filter(Don.id_don.in_(dons_ids)).all()
-
-    # Construire le corpus (titre + description)
-    user_texts = [d.titre + " " + (d.description or "") for d in user_dons]
-    user_text = " ".join(user_texts)
-
-    # Tous les autres dons valides
-    all_dons = Don.query.filter(Don.statut == "valide").all()
-    all_texts = [don.titre + " " + (don.description or "") for don in all_dons]
-
-    # TF-IDF + similarité cosinus
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform([user_text] + all_texts)
-    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
-
-    # Associer similarités avec les dons
-    dons_scores = [
-        {"don": don, "score": score}
-        for don, score in zip(all_dons, cosine_similarities)
-        if don.id_don not in dons_ids  # Ne pas recommander les dons déjà soutenus
-    ]
-    dons_scores.sort(key=lambda x: x["score"], reverse=True)
-
-    recommandations = [
-        {
-            "id_don": d["don"].id_don,
-            "titre": d["don"].titre,
-            "description": d["don"].description,
-            "photo_don": d["don"].photo_don,
-            "montant_collecte": d["don"].montant_collecte,
-            "objectif": d["don"].objectif,
-            "score": round(d["score"], 2)
-        }
-        for d in dons_scores[:5]  # Recommander les 5 meilleurs
-    ]
-
-    return jsonify(recommandations), 200 """
-
-
-
 
 # ------------------- DATABASE MIGRATION -------------------
 with app.app_context():
