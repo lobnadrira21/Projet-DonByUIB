@@ -1250,6 +1250,16 @@ def participate(id_don):
 # Vérifier si l’objectif est atteint
         if don.montant_collecte >= don.objectif:
             don.is_reussi = True
+        # ✅ Notification à l’association lors d’une participation
+        notif = Notification(
+         contenu=f"{user.nom_complet} a participé avec {montant} TND au don « {don.titre} ». 🙏",
+        id_association=don.id_association,
+        id_don=don.id_don,
+        is_read=False,
+        date=datetime.utcnow()
+        )
+        db.session.add(notif)
+
         db.session.commit()
 
         return jsonify({
@@ -1268,7 +1278,8 @@ def get_don_participants():
         results = db.session.query(
             Don.id_don,
             Don.titre,
-            db.func.count(Participation.id_participation).label("nb_participants")
+            db.func.count(db.func.distinct(Participation.id_user)).label("nb_participants")
+
         ).outerjoin(Participation).group_by(Don.id_don).all()
 
         data = []
