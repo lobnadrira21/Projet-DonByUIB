@@ -1582,10 +1582,11 @@ def get_notifications():
     if claims.get("role") != "association":
         return jsonify({"error": "Access denied!"}), 403
 
-    user = User.query.get(get_jwt_identity())
-    association = Association.query.join(User, Association.email == User.email)\
-                                .filter(User.id == get_jwt_identity())\
-                                .first()
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+
+    # 🟢 Récupère l'association directement par id_admin si user.role == association
+    association = Association.query.filter_by(email=user.email).first()
 
     if not association:
         return jsonify({"error": "Association not found"}), 404
@@ -1600,6 +1601,7 @@ def get_notifications():
         }
         for n in notifs
     ])
+
 
 #notification donateur
 
@@ -1781,7 +1783,43 @@ def get_paiements_donator():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-#recu de paiement
+# cette fonction permet à l'association de voir le donateur qui a fait les dons
+@app.route("/paiements-association", methods=["GET"])
+@jwt_required()
+def get_paiements_association():
+    try:
+        claims = get_jwt()
+        if claims.get("role") != "association":
+            return jsonify({"error": "Accès refusé"}), 403
+
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        association = Association.query.filter_by(email=user.email).first()
+
+        if not association:
+            return jsonify({"error": "Association introuvable."}), 404
+
+        # Tous les dons de cette association
+        dons_ids = [don.id_don for don in association.dons]
+
+        participations = Participation.query.filter(Participation.id_don.in_(dons_ids)).all()
+
+        result = []
+        for p in participations:
+            result.append({
+                "id_participation": p.id_participation,
+                "titre_don": p.don.titre,
+                "montant": p.montant,
+                "date": p.date_participation.strftime("%d/%m/%Y"),
+                "donateur": p.user.nom_complet if p.user else "Utilisateur inconnu"
+            })
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#recu de paiement (vu par donateur et association)
 from flask import make_response, jsonify
 from xhtml2pdf import pisa
 from io import BytesIO
@@ -1798,6 +1836,9 @@ def generate_recu_pdf(id_participation):
 
     don = participation.don
     user = participation.user
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+
 
     # 📷 Logo UIB
     logo_path = os.path.join(app.root_path, 'static', 'uploads', 'uiblogo.png')

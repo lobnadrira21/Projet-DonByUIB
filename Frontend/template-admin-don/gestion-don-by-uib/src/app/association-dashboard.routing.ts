@@ -7,6 +7,7 @@ import { BodyAssociationComponent } from './components/body-association/body-ass
 import { ListPublicationComponent } from './components/list-publication/list-publication.component';
 import { ModifierPublicationComponent } from './components/modifier-publication/modifier-publication.component';
 import { ModifierDonComponent } from './components/modifier-don/modifier-don.component';
+import { PaiementRecuAssociationComponent } from './components/paiement-recu-association/paiement-recu-association.component';
 
 const routes: Routes = [
   {
@@ -26,7 +27,8 @@ const routes: Routes = [
       },
       {path: 'table-publication', component: ListPublicationComponent},
        { path: 'modifier-publication/:id', component: ModifierPublicationComponent },
-       {path: 'modifier-don/:id',component:ModifierDonComponent}
+       {path: 'modifier-don/:id',component:ModifierDonComponent},
+       {path: 'payment-recu',component:PaiementRecuAssociationComponent}
     ]
   }
 ];

@@ -1,0 +1,82 @@
+.paiements-wrapper {
+  padding: 2rem;
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #eb1c34;
+    }
+
+    .subtitle {
+      color: #555;
+      font-size: 1rem;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      color: #333;
+
+      thead {
+        background-color: #eb1c34;
+
+        th {
+          text-align: left;
+          padding: 12px 15px;
+          font-weight: 600;
+          color: white;
+        }
+      }
+
+      tbody {
+        tr {
+          border-top: 1px solid #e0e0e0;
+
+          &:hover {
+            background-color: #f1faff;
+          }
+
+          td {
+            padding: 12px 15px;
+            vertical-align: middle;
+          }
+
+          .download-btn {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &:hover {
+              background-color: #388e3c;
+            }
+          }
+        }
+      }
+    }
+
+    .no-data {
+      text-align: center;
+      color: #888;
+      padding: 1rem;
+      font-style: italic;
+    }
+  }
+}

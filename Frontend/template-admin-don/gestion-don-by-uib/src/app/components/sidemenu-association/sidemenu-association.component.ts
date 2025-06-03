@@ -12,7 +12,8 @@ declare interface RouteInfo {
 export const ROUTES: RouteInfo[] = [
   { path: '/dashboard-association', title: 'Dashboard',  icon: 'dashboard', class: '' }, // ✅ Fixed
   { path: '/dashboard-association/user-profile', title: 'User Profile',  icon:'person', class: '' }, // ✅ Fixed
-  { path: '/dashboard-association/table-list', title: 'Table List',  icon:'content_paste', class: '' } // ✅ Fixed
+  { path: '/dashboard-association/table-list', title: 'Table List',  icon:'content_paste', class: '' }, // ✅ Fixed
+  { path: '/dashboard-association/payment-recu', title: 'payment',  icon:'payments', class: '' } // ✅ Fixed
 ];
 
 @Component({

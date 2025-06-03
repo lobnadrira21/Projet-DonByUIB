@@ -343,15 +343,25 @@ getMesPaiements(): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/mes-paiements`, { headers });
 }
 
+//association peut voir qui a fait les dons
+getPaiementsAssociation(): Observable<any[]> {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+  return this.http.get<any[]>(`http://127.0.0.1:5000/paiements-association`, { headers });
+}
+
+
 getRecuPaiement(id_participation: number): Observable<Blob> {
-  const token = this.getToken();  // Récupère le JWT du localStorage
+  const token = this.getToken();
   const headers = new HttpHeaders({
     Authorization: `Bearer ${token}`
   });
 
   return this.http.get(`http://127.0.0.1:5000/recu-pdf/${id_participation}`, {
     headers,
-    responseType: 'blob'  // Pour recevoir un fichier PDF
+    responseType: 'blob'
   });
 }
 

@@ -1,0 +1,41 @@
+<div class="paiements-wrapper">
+  <div class="header-section" style="margin-top: 2%;">
+    <h2 class="title">📥 Paiements reçus</h2>
+    <p class="subtitle">Liste des participations avec reçu téléchargeable au format PDF.</p>
+  </div>
+
+  <div class="table-container">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Don</th>
+          <th>Donateur</th>
+          <th>Montant (TND)</th>
+          <th>Date</th>
+          <th>Reçu</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr *ngFor="let paiement of paiements">
+      <td>{{ paiement.titre_don }}</td>
+      <td>{{ paiement.donateur }}</td>
+      <td>{{ paiement.montant }}</td>
+      <td>{{ paiement.date | date: 'dd/MM/yyyy' }}</td>
+  
+
+
+    <td>
+      <button class="download-btn" (click)="downloadRecu(paiement.id_participation)">
+        📄 Télécharger
+      </button>
+    </td>
+  </tr>
+</tbody>
+
+    </table>
+
+    <div *ngIf="paiements.length === 0" class="no-data">
+      Aucun paiement reçu pour le moment.
+    </div>
+  </div>
+</div>

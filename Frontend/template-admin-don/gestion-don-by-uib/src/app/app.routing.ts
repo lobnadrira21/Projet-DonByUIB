@@ -38,6 +38,7 @@ import { ValiderRefuserPublicationComponent } from './admin/valider-refuser-publ
 import { MesPaiementsComponent } from './donator/mes-paiements/mes-paiements.component';
 import { AssociationDetailComponent } from './front/association-detail/association-detail.component';
 import { HistoriqueDonatorComponent } from './donator/historique-donator/historique-donator.component';
+import { PaiementRecuAssociationComponent } from './components/paiement-recu-association/paiement-recu-association.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'client', pathMatch: 'full' },
@@ -79,7 +80,8 @@ export const routes: Routes = [
       { path: 'table-list', component: TableListComponent },
       {path: 'table-publication', component: ListPublicationComponent},
       { path: 'modifier-publication/:id', component: ModifierPublicationComponent },
-      {path: 'modifier-don/:id',component:ModifierDonComponent}
+      {path: 'modifier-don/:id',component:ModifierDonComponent},
+      {path: 'payment-recu', component:PaiementRecuAssociationComponent}
     ]
   },
 
