@@ -356,13 +356,21 @@ getRecuPaiement(id_participation: number): Observable<Blob> {
 }
 
 getHistorique(): Observable<any[]> {
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+  const token = this.getToken();
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   return this.http.get<any[]>(`${this.apiUrl}/historique-donateur`, { headers });
 }
 
 
+
 getDonatorNotifications() {
   return this.http.get<any[]>(`${this.apiUrl}/notifications-donator`);
+}
+
+cleanupOldNotifications() {
+  const token = this.getToken();
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  return this.http.delete(`${this.apiUrl}/notifications/cleanup`, { headers });
 }
 
 

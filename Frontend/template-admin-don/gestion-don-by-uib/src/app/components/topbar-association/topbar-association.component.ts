@@ -55,17 +55,36 @@ export class TopbarAssociationComponent implements OnInit {
       this.mobile_menu_visible = 0;
     }
   });
+// Supprimer les notifications de plus de 24h (appel backend)
+ this.authService.cleanupOldNotifications().subscribe({
+      next: (res) => {
+        console.log("🧹 Notifications anciennes nettoyées :", res);
 
-  this.authService.getNotifications().subscribe({
-    next: (data) => {
-      console.log("🔔 Notifications reçues :", data); 
-      this.notifications = data;
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des notifications :', err);
-    }
-  });
-  
+        // Étape 2 : Récupérer les notifications à jour
+        this.loadFreshNotifications();
+      },
+      error: (err) => {
+        console.error("Erreur lors du nettoyage des notifications :", err);
+        this.loadFreshNotifications();  // Charger quand même
+      }
+    });
+  }
+
+  loadFreshNotifications() {
+    this.authService.getNotifications().subscribe({
+      next: (data) => {
+        // ✅ Supprime côté Angular les notifs de + de 24h (juste au cas où)
+        const now = new Date();
+        this.notifications = data.filter((notif: any) => {
+          const notifDate = new Date(notif.date);
+          const diffHours = (now.getTime() - notifDate.getTime()) / (1000 * 60 * 60);
+          return diffHours <= 24;
+        });
+
+        console.log("🔔 Notifications récentes affichées :", this.notifications);
+      },
+      error: (err) => console.error('Erreur lors du chargement des notifications :', err)
+    });
   }
 
   sidebarOpen() {

@@ -927,6 +927,21 @@ def valider_don(id_don):
 
     db.session.commit()
     return jsonify({"message": "Don validé avec succès"}), 200
+# supprimer les notifications qui dépassent 24h
+@app.route('/notifications/cleanup', methods=['DELETE'])
+@jwt_required()
+def supprimer_anciennes_notifications():
+    if get_jwt().get("role") != "association":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    limite = datetime.utcnow() - timedelta(days=1)
+    anciennes = Notification.query.filter(Notification.date < limite).all()
+
+    for notif in anciennes:
+        db.session.delete(notif)
+
+    db.session.commit()
+    return jsonify({"message": f"{len(anciennes)} notifications supprimées"}), 200
 
 
 # Refuser don
@@ -1557,7 +1572,10 @@ def get_notifications():
         return jsonify({"error": "Access denied!"}), 403
 
     user = User.query.get(get_jwt_identity())
-    association = Association.query.filter_by(email=user.email).first()
+    association = Association.query.join(User, Association.email == User.email)\
+                                .filter(User.id == get_jwt_identity())\
+                                .first()
+
     if not association:
         return jsonify({"error": "Association not found"}), 404
 
@@ -1753,13 +1771,12 @@ def get_paiements_donator():
         return jsonify({"error": str(e)}), 500
     
 #recu de paiement
-from flask import make_response, send_file
+from flask import make_response, jsonify
 from xhtml2pdf import pisa
 from io import BytesIO
-import qrcode
-import base64
+import base64, os
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import os
+ 
 
 @app.route('/recu-pdf/<int:id_participation>', methods=['GET'])
 @jwt_required()
@@ -1771,21 +1788,12 @@ def generate_recu_pdf(id_participation):
     don = participation.don
     user = participation.user
 
-    """ # 🧠 Génération QR Code dynamique
-    association_id = don.id_association
-    qr_data = f"http://localhost:4200/#/detail-association/{association_id}"
-
-    qr_img = qrcode.make(qr_data)
-    qr_buffer = BytesIO()
-    qr_img.save(qr_buffer, format="PNG")
-    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode("utf-8") """
-
-    # 📷 Logo UIB (sous static/uploads/uiblogo.png)
+    # 📷 Logo UIB
     logo_path = os.path.join(app.root_path, 'static', 'uploads', 'uiblogo.png')
     with open(logo_path, "rb") as image_file:
         logo_base64 = base64.b64encode(image_file.read()).decode("utf-8")
 
-    # 📄 HTML du reçu
+    # ✅ Génération du HTML du reçu
     html = f"""
     <html>
       <head>
@@ -1795,7 +1803,6 @@ def generate_recu_pdf(id_participation):
           .logo {{ width: 100px; }}
           .content {{ margin-top: 30px; }}
           .section {{ margin-bottom: 10px; }}
-          
           .footer {{ text-align: center; margin-top: 50px; font-size: 12px; color: #555; }}
         </style>
       </head>
@@ -1813,9 +1820,6 @@ def generate_recu_pdf(id_participation):
           <div class="section"><strong>Date :</strong> {participation.date_participation.strftime('%d/%m/%Y')}</div>
         </div>
 
-   
-
-
         <div class="footer">
           Ce reçu est généré automatiquement par DonByUIB.<br>
           Merci pour votre soutien et votre générosité.
@@ -1824,7 +1828,19 @@ def generate_recu_pdf(id_participation):
     </html>
     """
 
-    # Génération PDF
+    # ✅ Création d’une notification à l’association
+    try:
+        notif = Notification(
+            contenu=f"{user.nom_complet} a téléchargé le reçu de paiement pour un don de {participation.montant} TND sur « {don.titre} ».",
+            id_association=don.id_association
+        )
+        db.session.add(notif)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print("Erreur lors de la création de la notification :", e)
+
+    # ✅ Génération du PDF
     buffer = BytesIO()
     pisa_status = pisa.CreatePDF(BytesIO(html.encode('utf-8')), dest=buffer)
     if pisa_status.err:
@@ -1834,6 +1850,7 @@ def generate_recu_pdf(id_participation):
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'inline; filename=recu_{id_participation}.pdf'
     return response
+
 
 # historique du donateur 
 
