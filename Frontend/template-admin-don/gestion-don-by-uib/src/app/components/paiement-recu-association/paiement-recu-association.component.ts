@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { OcrModalFileComponent } from '../../modals/ocr-modal-file/ocr-modal-file.component';
 
 @Component({
   selector: 'app-paiement-recu-association',
@@ -14,7 +16,7 @@ import { AuthService } from 'app/services/auth.service';
 export class PaiementRecuAssociationComponent implements OnInit {
   paiements: any[] = [];
 
-  constructor(private authService: AuthService, private http: HttpClient) {}
+  constructor(private authService: AuthService, private http: HttpClient, private dialog: MatDialog) {}
 
   ngOnInit(): void {
   this.authService.getPaiementsAssociation().subscribe({
@@ -27,16 +29,26 @@ export class PaiementRecuAssociationComponent implements OnInit {
   });
 }
 
-downloadRecu(participationId: number) {
-  this.authService.getRecuPaiement(participationId).subscribe(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recu_don_${participationId}.pdf`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  });
+
+
+extraireTexteOCR(participationId: number) {
+  this.http.get<any>(`http://127.0.0.1:5000/ocr-recu/${participationId}`).subscribe({
+  next: res => {
+    const structured = res.structured_data;
+    structured["id_participation"] = participationId; 
+    this.dialog.open(OcrModalFileComponent, {
+      data: structured,
+      width: '450px'
+    });
+  },
+  error: err => {
+    console.error("Erreur OCR :", err);
+    alert("Erreur lors de l'OCR.");
+  }
+});
+
 }
+
 
 }
 

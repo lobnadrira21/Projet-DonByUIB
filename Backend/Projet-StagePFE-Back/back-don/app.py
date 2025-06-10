@@ -1864,19 +1864,9 @@ def generate_recu_pdf(id_participation):
         </div>
       </body>
     </html>
-    """
+    
 
-    # ✅ Création d’une notification à l’association
-    try:
-        notif = Notification(
-            contenu=f"{user.nom_complet} a téléchargé le reçu de paiement pour un don de {participation.montant} TND sur « {don.titre} ».",
-            id_association=don.id_association
-        )
-        db.session.add(notif)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        print("Erreur lors de la création de la notification :", e)
+      """
 
     # ✅ Génération du PDF
     buffer = BytesIO()
@@ -1928,6 +1918,60 @@ def get_historique_donateur():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+    # tesseract
+
+from flask import jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+import pytesseract
+from pdf2image import convert_from_bytes
+import re
+
+# 📍 Définir le chemin vers tesseract (Windows)
+pytesseract.pytesseract.tesseract_cmd = r"D:\TesseractFolder\Tesseract-OCR\tesseract.exe"
+
+@app.route("/ocr-recu/<int:id_participation>", methods=["GET"])
+@jwt_required()
+def ocr_recu(id_participation):
+    try:
+        # 📄 Générer le reçu PDF existant via la fonction
+        pdf_response = generate_recu_pdf(id_participation)
+        if pdf_response.status_code != 200:
+            return pdf_response
+
+        # 📥 Lire le contenu PDF en bytes
+        pdf_data = pdf_response.get_data()
+
+        # 🖼️ Convertir en image avec poppler path
+        images = convert_from_bytes(pdf_data, poppler_path=r"D:\Popper\poppler-24.08.0\Library\bin")
+
+        if not images:
+            return jsonify({"error": "Échec de conversion PDF -> image"}), 400
+
+        # 🔍 Appliquer OCR
+        text = pytesseract.image_to_string(images[0], lang="eng")
+
+        # 🔎 Extraire les données structurées
+        infos = {
+            "donateur": re.search(r"Nom du Donateur\s*:\s*(.+)", text),
+            "email": re.search(r"Email\s*:\s*(.+)", text),
+            "campagne": re.search(r"Campagne\s*:\s*(.+)", text),
+            "montant": re.search(r"Montant\s*:\s*([\d,.]+)", text),
+            "date": re.search(r"Date\s*:\s*(\d{2}/\d{2}/\d{4})", text)
+        }
+        structured = {k: (m.group(1).strip() if m else None) for k, m in infos.items()}
+
+        return jsonify({
+            "extracted_text": text,
+            "structured_data": structured
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 # ------------------- DATABASE MIGRATION -------------------
 with app.app_context():

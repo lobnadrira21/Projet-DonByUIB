@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>🧾 Données du reçu</h2>
+<div mat-dialog-content>
+  <p><strong>Nom du donateur :</strong> {{ data.donateur || 'Non détecté' }}</p>
+  <p><strong>Email :</strong> {{ data.email || 'Non détecté' }}</p>
+  <p><strong>Campagne :</strong> {{ data.campagne || 'Non détecté' }}</p>
+  <p><strong>Montant :</strong> {{ data.montant || 'Non détecté' }}</p>
+  <p><strong>Date :</strong> {{ data.date || 'Non détectée' }}</p>
+</div>
+<div mat-dialog-actions align="end">
+      <button class="download-btn"  mat-button  (click)="downloadRecu(data.id_participation)" style="margin-right: 1%;">📄 Télécharger</button>
+    <button class="download-btn" mat-button (click)="close()">Fermer</button>
+</div>
