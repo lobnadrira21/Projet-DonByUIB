@@ -5,7 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { TypeAssociation } from 'app/models/type-association.model';
 import { AuthService } from 'app/services/auth.service';
 
 @Component({
@@ -17,11 +19,13 @@ import { AuthService } from 'app/services/auth.service';
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        RouterModule],
+        RouterModule,
+       MatSelectModule ],
   templateUrl: './modifier-compte-association.component.html',
   styleUrl: './modifier-compte-association.component.scss'
 })
 export class ModifierCompteAssociationComponent  implements OnInit   {
+  typesAssociation: string[] = Object.values(TypeAssociation);
   id!: number;
   association = {
     nom_complet: '',

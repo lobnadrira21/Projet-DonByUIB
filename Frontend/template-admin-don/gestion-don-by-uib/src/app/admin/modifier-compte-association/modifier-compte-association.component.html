@@ -25,9 +25,14 @@
     <input matInput [(ngModel)]="association.adresse" name="adresse" required>
   </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>type association</mat-label>
-    <input matInput [(ngModel)]="association.type_association" name="type_association" required>
-  </mat-form-field>
+  <mat-form-field class="full-width">
+  <mat-label>Type d'association</mat-label>
+  <mat-select [(ngModel)]="association.type_association" name="type_association" required>
+    <mat-option *ngFor="let type of typesAssociation" [value]="type">
+      {{ type }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
   <button mat-raised-button color="warn" class="btn-enregistrer" type="submit">Enregistrer</button>
 </form>

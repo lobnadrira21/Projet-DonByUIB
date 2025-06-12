@@ -27,9 +27,14 @@
     </mat-form-field>
 
     <mat-form-field class="full-width">
-      <mat-label>Type Association</mat-label>
-      <input matInput name="type_association" [(ngModel)]="association.type_association" required>
-    </mat-form-field>
+  <mat-label>Type d'association</mat-label>
+  <mat-select [(ngModel)]="association.type_association" name="type_association" required>
+    <mat-option *ngFor="let type of typesAssociation" [value]="type">
+      {{ type }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
 
     <mat-form-field class="full-width">
       <mat-label>Mot de passe</mat-label>

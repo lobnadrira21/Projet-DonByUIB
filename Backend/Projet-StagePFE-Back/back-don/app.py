@@ -6,7 +6,7 @@ import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 
-from enum import Enum
+
 from flask_cors import CORS
 import ast
 from flask_cors import CORS
@@ -78,6 +78,16 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+# class enum de type association
+import enum
+from sqlalchemy import Enum as SqlEnum
+
+class TypeAssociationEnum(enum.Enum):
+    HUMANITAIRE = "humanitaire"
+    EDUCATION = "éducation"
+    SANTE = "santé"
+    ENVIRONNEMENT = "environnement"
+    AUTRE = "autre"
 
 
 
@@ -90,7 +100,12 @@ class Association(db.Model):
     description_association = db.Column(db.String(255), nullable=True)
     telephone = db.Column(db.String(15), nullable=False)  
     adresse = db.Column(db.String(100), nullable=True)  
-    type_association = db.Column(db.String(50), nullable=True)
+    type_association = db.Column(
+    SqlEnum(TypeAssociationEnum, name="type_association_enum"),
+    nullable=False,
+    default=TypeAssociationEnum.AUTRE
+)
+
     photo = db.Column(db.String(255), nullable=True)  # pour stocker le chemin de la photo
 
     
@@ -275,6 +290,16 @@ def register():
     return jsonify({"message": f"{role.capitalize()} registered successfully"}), 201
 
 
+# afficher infos donateur 
+@app.route('/get-info-donateur', methods=['GET']) 
+@jwt_required()
+def get_info_donator():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    return jsonify({
+        "nom_complet": user.nom_complet,
+        "email": user.email
+    })
 
 # Login Route
 @app.route("/login", methods=["POST"])
@@ -372,6 +397,7 @@ def request_password_reset():
     return jsonify({"message": "Un lien de réinitialisation a été envoyé à votre email."}), 200
 
 
+
 @app.route("/create-association", methods=["POST"])
 @jwt_required()
 def create_association():
@@ -389,6 +415,15 @@ def create_association():
         for field in required_fields:
             if field not in data or not isinstance(data[field], str) or not data[field].strip():
                 return jsonify({"error": f"'{field}' must be a non-empty string"}), 400
+        #validation type enum 
+        type_str = data["type_association"].strip().lower()
+        try:
+            type_enum = TypeAssociationEnum(type_str)
+        except ValueError:
+            valid_types = [t.value for t in TypeAssociationEnum]
+            return jsonify({
+                "error": f"Type d'association invalide. Valeurs valides : {valid_types}"
+            }), 400
 
         if User.query.filter_by(email=data["email"]).first():
             return jsonify({"error": "Email already exists"}), 409
@@ -409,7 +444,7 @@ def create_association():
             description_association=data.get("description_association", "").strip(),
             telephone=data["telephone"].strip(),
             adresse=data["adresse"].strip(),
-            type_association=data["type_association"].strip(),
+            type_association=type_enum,
             id_admin=current_user_id  # 🟢 celui qui est loggé (admin)
         )
         db.session.add(new_association)
@@ -448,7 +483,7 @@ def get_associations():
                 "description_association": assoc.description_association,  # ✅ Ensure it's included
                 "telephone": assoc.telephone,  # ✅ Ensure it's included
                 "adresse": assoc.adresse,  # ✅ Ensure it's included
-                "type_association": assoc.type_association, # ✅ Ensure it's included
+                "type_association": assoc.type_association.value, # ✅ Ensure it's included
                 
             }
             for assoc in associations
@@ -492,7 +527,14 @@ def modify_compte_association(id):
         if "adresse" in data:
             association.adresse = data["adresse"].strip()
         if "type_association" in data:
-            association.type_association = data["type_association"].strip()
+            try:
+                type_enum = TypeAssociationEnum(data["type_association"].strip().lower())
+                association.type_association = type_enum
+            except ValueError:
+                valid_types = [t.value for t in TypeAssociationEnum]
+                return jsonify({
+                    "error": f"Type d'association invalide. Valeurs valides : {valid_types}"
+        }), 400
 
         db.session.commit()
         return jsonify({"message": "Association updated successfully!"}), 200
@@ -567,7 +609,15 @@ def modify_association():
             association.adresse = data["adresse"].strip()
 
         if "type_association" in data:
-            association.type_association = data["type_association"].strip()
+            try:
+                type_enum = TypeAssociationEnum(data["type_association"].strip().lower())
+                association.type_association = type_enum
+            except ValueError:
+                valid_types = [t.value for t in TypeAssociationEnum]
+            return jsonify({
+            "error": f"Type d'association invalide. Valeurs valides : {valid_types}"
+        }), 400
+
 
         if "old_password" in data and "new_password" in data:
             if not user.check_password(data["old_password"]):
@@ -679,7 +729,7 @@ def get_association_detail(id):
             "description_association": association.description_association,
             "telephone": association.telephone,
             "adresse": association.adresse,
-            "type_association": association.type_association,
+            "type_association": association.type_association.value,
         }
 
         return jsonify(result), 200
@@ -710,7 +760,8 @@ def get_profile_association():
             "description_association": association.description_association,
             "telephone": association.telephone,
             "adresse": association.adresse,
-            "type_association": association.type_association,
+            "type_association": association.type_association.name,
+
             "photo": association.photo,
 
         }), 200
@@ -1804,6 +1855,33 @@ def get_paiements_association():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# participation du donateur
+@app.route("/mes-participations", methods=["GET"])
+@jwt_required()
+def mes_participations():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+
+    if user.role != "donator":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    participations = Participation.query.filter_by(id_user=current_user_id).all()
+
+    result = []
+    for p in participations:
+        result.append({
+            "id_participation": p.id_participation,
+            "montant": p.montant,
+            "date_participation": p.date_participation.strftime('%d/%m/%Y'),
+            "don": {
+                "id_don": p.don.id_don,
+                "titre": p.don.titre,
+                "photo_don": p.don.photo_don
+            }
+        })
+
+    return jsonify(result), 200
 
 #recu de paiement (vu par donateur et association)
 from flask import make_response, jsonify

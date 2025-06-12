@@ -1,0 +1,7 @@
+export enum TypeAssociation {
+  HUMANITAIRE = 'HUMANITAIRE',
+  EDUCATION = 'EDUCATION',
+  SANTE = 'SANTE',
+  ENVIRONNEMENT = 'ENVIRONNEMENT',
+  AUTRE = 'AUTRE'
+}

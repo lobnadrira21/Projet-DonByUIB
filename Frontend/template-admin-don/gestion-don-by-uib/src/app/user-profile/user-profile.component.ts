@@ -5,6 +5,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { FormBuilder, FormGroup, Validators ,ReactiveFormsModule} from '@angular/forms';
 import { AuthService } from 'app/services/auth.service';
 import { Router } from '@angular/router';
+import { TypeAssociation } from 'app/models/type-association.model';
+import { MatSelectModule } from '@angular/material/select';
+
 @Component({
   selector: 'app-user-profile',
   standalone:true,
@@ -15,17 +18,21 @@ import { Router } from '@angular/router';
     MatInputModule,      // ✅ Import Material Input
     MatButtonModule,
     ReactiveFormsModule,
+    MatSelectModule
   ]
 })
 export class UserProfileComponent implements OnInit {
+typesAssociation: string[] = Object.values(TypeAssociation);
 
   profileForm!: FormGroup;
   message: string = '';
+  
 
   constructor(private authService: AuthService, private fb: FormBuilder,private router: Router) {}
 
   ngOnInit() {
     // Initialize form
+    this.typesAssociation = Object.values(TypeAssociation);
     this.profileForm = this.fb.group({
       nom_complet: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -37,6 +44,7 @@ export class UserProfileComponent implements OnInit {
       new_password: [''],
       photo: [''] 
     });
+     this.loadProfile();
   }
  
   photoPreview: string | ArrayBuffer | null = null;
@@ -105,7 +113,7 @@ export class UserProfileComponent implements OnInit {
     );
 
 
-  this.loadProfile();
+ 
 
 }
 }
