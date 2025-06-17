@@ -1,0 +1,16 @@
+.legend {
+  list-style: none;
+  padding-left: 0;
+}
+.legend li {
+  margin: 5px 0;
+  font-weight: 500;
+}
+.legend-color {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+

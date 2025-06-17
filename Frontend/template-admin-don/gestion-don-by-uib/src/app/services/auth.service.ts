@@ -383,5 +383,11 @@ cleanupOldNotifications() {
   return this.http.delete(`${this.apiUrl}/notifications/cleanup`, { headers });
 }
 
-
+ getAdminStats() {
+  const token = this.getToken();
+  const headers = new HttpHeaders({
+    Authorization: `Bearer ${token}`
+  });
+    return this.http.get<any>(`${this.apiUrl}/admin/statistiques`, { headers });
+  }
 }

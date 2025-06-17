@@ -5,8 +5,6 @@ from flask_jwt_extended import JWTManager, create_access_token, get_jwt, jwt_req
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
-
-
 from flask_cors import CORS
 import ast
 from flask_cors import CORS
@@ -612,11 +610,14 @@ def modify_association():
             try:
                 type_enum = TypeAssociationEnum(data["type_association"].strip().lower())
                 association.type_association = type_enum
-            except ValueError:
+            except ValueError as e:
                 valid_types = [t.value for t in TypeAssociationEnum]
-            return jsonify({
-            "error": f"Type d'association invalide. Valeurs valides : {valid_types}"
-        }), 400
+                return jsonify({
+                    "error": f"Type d'association invalide. Valeurs valides : {valid_types}"
+                }), 400
+
+
+
 
 
         if "old_password" in data and "new_password" in data:
@@ -2048,6 +2049,79 @@ def ocr_recu(id_participation):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+# stat admin
+
+@app.route("/admin/statistiques", methods=["GET"])
+@jwt_required()
+def get_admin_stats():
+    claims = get_jwt()
+    if claims.get("role") != "admin":
+        return jsonify({"error": "Accès refusé"}), 403
+
+    try:
+        # ✅ Comptage par type d'association
+        types = [t.value for t in TypeAssociationEnum]
+        association_par_type = {}
+
+        for t in types:
+            count = Association.query.filter_by(type_association=TypeAssociationEnum(t)).count()
+            association_par_type[t] = count
+
+
+        # ✅ Nombre total d'associations (somme des types)
+        nb_associations = sum(association_par_type.values())
+
+        # ✅ Autres statistiques
+        nb_dons = Don.query.count()
+        total_montant = db.session.query(db.func.sum(Don.montant_collecte)).scalar() or 0.0
+        nb_dons_reussis = Don.query.filter_by(is_reussi=True).count()
+
+        # Répartition des dons par statut
+        nb_en_attente = Don.query.filter_by(statut="en_attente").count()
+        nb_valides = Don.query.filter_by(statut="valide").count()
+        nb_refuses = Don.query.filter_by(statut="refuse").count()
+
+        # Top 5 dons les plus financés
+        top_dons = Don.query.order_by(Don.montant_collecte.desc()).limit(5).all()
+        top_dons_data = [
+            {"titre": d.titre, "montant_collecte": d.montant_collecte, "objectif": d.objectif}
+            for d in top_dons
+        ]
+
+        # Montant collecté par mois (12 mois)
+        montant_par_mois = []
+        for m in range(1, 13):
+            montant = db.session.query(db.func.sum(Participation.montant))\
+                .filter(db.extract('month', Participation.date_participation) == m)\
+                .scalar() or 0.0
+            montant_par_mois.append(montant)
+
+        # Publications validées et refusées
+        nb_pub_valides = Publication.query.filter_by(statut="valide").count()
+        nb_pub_refusees = Publication.query.filter_by(statut="refuse").count()
+
+        # Donateurs actifs (distinct)
+        nb_donateurs_actifs = db.session.query(Participation.id_user).distinct().count()
+
+        return jsonify({
+            "nb_associations": nb_associations,
+            "association_par_type": association_par_type,
+            "nb_dons": nb_dons,
+            "total_montant": total_montant,
+            "nb_dons_reussis": nb_dons_reussis,
+            "nb_en_attente": nb_en_attente,
+            "nb_valides": nb_valides,
+            "nb_refuses": nb_refuses,
+            "top_dons": top_dons_data,
+            "montant_par_mois": montant_par_mois,
+            "nb_pub_valides": nb_pub_valides,
+            "nb_pub_refusees": nb_pub_refusees,
+            "nb_donateurs_actifs": nb_donateurs_actifs
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 
